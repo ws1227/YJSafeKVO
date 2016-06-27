@@ -102,7 +102,7 @@ It's the feature for key path validation during compile time. Since `#keyPath` w
 
 <br>
 
-* What about the case when multiple threads is involved ?
+* What about the case when multiple threads are involved ?
 
 For example if your observed property is being set with new value on one thread, and you expect to update UI with new value in the callback block executed on main thread. You can use the extended API for specifing a `NSOperationQueue` parameter.
 

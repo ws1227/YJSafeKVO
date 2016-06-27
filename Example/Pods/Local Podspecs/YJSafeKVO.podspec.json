@@ -1,0 +1,22 @@
+{
+  "name": "YJSafeKVO",
+  "version": "0.1.0",
+  "summary": "A short description of YJSafeKVO.",
+  "description": "TODO: Add long description of the pod here.",
+  "homepage": "https://github.com/<GITHUB_USERNAME>/YJSafeKVO",
+  "license": {
+    "type": "MIT",
+    "file": "LICENSE"
+  },
+  "authors": {
+    "huang-kun": "jack-huang-developer@foxmail.com"
+  },
+  "source": {
+    "git": "https://github.com/<GITHUB_USERNAME>/YJSafeKVO.git",
+    "tag": "0.1.0"
+  },
+  "platforms": {
+    "ios": "8.0"
+  },
+  "source_files": "YJSafeKVO/Classes/**/*"
+}

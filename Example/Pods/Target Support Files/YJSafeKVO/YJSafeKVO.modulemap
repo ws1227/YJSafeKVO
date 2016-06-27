@@ -1,0 +1,6 @@
+framework module YJSafeKVO {
+  umbrella header "YJSafeKVO-umbrella.h"
+
+  export *
+  module * { export * }
+}

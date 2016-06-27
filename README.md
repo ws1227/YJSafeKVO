@@ -9,9 +9,11 @@
 
 如果你更倾向于阅读中文，可以点击[这里](https://github.com/huang-kun/YJSafeKVO/blob/master/README_CH.md)。
 
+<br>
+
 #### Problems
 
-The key value observing pattern is really important for the Cocoa and Cocoa Touch programming. You add an observer, observe the value changes, remove it when you finish. However, if you not use it correctly, the results are basically CRASHs.
+The key value observing pattern is really important for the Cocoa and Cocoa Touch programming. You add an observer, observe the value changes, remove it when you finish. However, if you not use it correctly, the results are basically crashes.
 
 First example: 
 
@@ -28,8 +30,6 @@ e.g. When you add an observer bar to observe foo's property, and forget to remov
 For some reason, if you observe the property of object which provided by system, and because that class is not what you created, you can not try to remove the observer by overriding -dealloc in that class (At least no elegant way to do that). 
 
 Another example:
-
-如果需要添加多个观察者的话，那么还得保证删除的时候一一对应。如果删除少了，就是上面的崩溃；删除过了，就是下面的崩溃。
 
 e.g. If you need to add multiple observers, you must make sure that you will remove them correctly. If you miss one, it crashes; if you remove the wrong one, it crashes.
 
@@ -53,7 +53,9 @@ Context: 0x0'
 
 #### Solutions
 
-Despite the usability and safefy, KVO is still important. As a developer, I just want to use some simple APIs to achieve the goal. Here is the solution:
+Despite the usability and safefy, KVO is still important. As a developer, I just want to use some simple APIs to achieve the goal. Here comes `YJSafeKVO`:
+
+The goal for `YJSafeKVO` is to provide a simple set of APIs that can prevent the general KVO crashes by developers, and also extremely easy to use.
 
 e.g. If I observe foo's property called name when it's name value changes. I call this:
 

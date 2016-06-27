@@ -9,6 +9,8 @@
 
 If you prefer reading in English, tap [here](https://github.com/huang-kun/YJSafeKVO/blob/master/README.md).
 
+<br>
+
 #### 先来吐槽
 
 在`Cocoa`和`Cocoa Touch`编程中，`KVO`的范式一直扮演着重要的角色：你需要添加观察者、观察属性值的改变、移除观察者。如果实现的稍有差错，那么结果基本就是崩溃。
@@ -54,6 +56,8 @@ Context: 0x0'
 
 虽然不管这些API是有多么的难用跟危险，`KVO`本身还是相当的重要。但是作为一名开发者，我只不过想调用一些简单的方法来完成目的而已。于是这里给出了解决方法：
 
+`YJSafeKVO`的目标，就是为已经适应`Cocoa`编程的开发者，提供一套使用简洁的接口，避免由于操作不当而引发不必要的崩溃。
+
 如果我需要观察foo的属性name，在name的值改变时做出响应，那么我就调用：
 
 ```
@@ -76,7 +80,7 @@ Context: 0x0'
 
 <br>
 
-#### 一些疑虑
+#### 关于疑虑
 
 * 调用`-observeKeyPath:forChanges:`和`-observeKeyPath:forUpdates:`具体有什么区别 ？
 
@@ -93,13 +97,13 @@ Context: 0x0'
 
 <br>
 
-* 这个是`@keyPath`神马 ?
+* 这个`@keyPath`是神马 ?
 
 它具有静态检查`key path`的特性（不用填写字符串对象，然后等到运行时再去判断）。自从苹果宣布`Swift 3`将支持`#keyPath`的特性以后，可以得出一个结论：对于`key path`的静态检查不仅能够保证代码安全，并且也会成为趋势。在`Objective C`中使用`@keyPath`就跟使用`@selector`差不多是一个道理。
 
 <br>
 
-* 如果牵扯了其他的线程问题怎么办 ？
+* 如果牵扯进了其他线程该怎么办 ？
 
 比如你观察的属性在其他线程中被赋值，但是你期望block能在主线程中回调并且更新UI。你可以使用另一个API，专门指定一个`NSOperationQueue`对象作为参数用于回调。
 

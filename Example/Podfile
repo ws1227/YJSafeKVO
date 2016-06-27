@@ -1,0 +1,6 @@
+use_frameworks!
+target 'YJSafeKVO_Tests' do
+  pod 'YJSafeKVO', :path => '../'
+  
+  
+end

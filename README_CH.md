@@ -149,7 +149,7 @@ YJSafeKVO 支持 [CocoaPods](http://cocoapods.org). 安装的话只需要创建P
 pod "YJSafeKVO"
 ```
 
-在`terminal`中运行`pod install`安装即可.
+在`terminal`中运行`pod install`安装后，在项目的`ProjectName-Prefix.pch`文件中引入`#import <YJSafeKVO/YJSafeKVO.h>`头文件即可使用。
 
 <br>
 

@@ -149,7 +149,7 @@ it, simply add the following line to your Podfile:
 pod "YJSafeKVO"
 ```
 
-To run the example project, clone the repo, and run `pod install` from the Example directory first.
+Go to terminal and run `pod install`, then `#import <YJSafeKVO/YJSafeKVO.h>` into project's `ProjectName-Prefix.pch` file.
 
 <br>
 

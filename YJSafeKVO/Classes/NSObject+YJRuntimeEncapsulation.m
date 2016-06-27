@@ -15,16 +15,41 @@
 //        YJTaggedPointerChecking
 /* ------------------------------------ */
 
-//  Reference: https://github.com/opensource-apple/objc4/blob/master/runtime/objc-internal.h
+// Reference:
+// https://github.com/opensource-apple/objc4/blob/master/runtime/objc-config.h
+// https://github.com/opensource-apple/objc4/blob/master/runtime/objc-internal.h
+
+#ifndef SUPPORT_TAGGED_POINTERS
+    #if !(__OBJC2__  &&  __LP64__)
+        #define SUPPORT_TAGGED_POINTERS 0
+    #else
+        #define SUPPORT_TAGGED_POINTERS 1
+    #endif
+#endif
+
+#ifndef SUPPORT_MSB_TAGGED_POINTERS
+    #if !SUPPORT_TAGGED_POINTERS  ||  !TARGET_OS_IPHONE
+        #define SUPPORT_MSB_TAGGED_POINTERS 0
+    #else
+        #define SUPPORT_MSB_TAGGED_POINTERS 1
+    #endif
+#endif
 
 @implementation NSObject (YJTaggedPointerChecking)
 
 - (BOOL)isTaggedPointer {
-#if TARGET_OS_IPHONE
-    return (intptr_t)self < 0;
-#else
-    return (uintptr_t)self & 1;
-#endif
+    #if SUPPORT_TAGGED_POINTERS
+        #if SUPPORT_MSB_TAGGED_POINTERS
+            return (intptr_t)self < 0; /* TARGET_OS_IPHONE */
+        #else
+            _Pragma("clang diagnostic push") \
+            _Pragma("clang diagnostic ignored \"-Wdeprecated-objc-pointer-introspection\"") \
+            return (uintptr_t)self & 1;
+            _Pragma("clang diagnostic pop")
+        #endif
+    #else
+        return NO;
+    #endif
 }
 
 @end
@@ -35,7 +60,7 @@
 /* ----------------------------------- */
 
 BOOL yj_object_isClass(id obj) {
-#if __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_8_0
+#if __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_8_0 || MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_10
     return object_isClass(obj);
 #else
     return obj == [obj class];

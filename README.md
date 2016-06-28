@@ -154,7 +154,7 @@ If you are familiar with `-addObserverForName:object:queue:usingBlock:` for `NSN
 
 #### What happen if the receiver is never deallocated ? Are these implicit generated receivers is gonna keep alive forever ?
 
-Theoretically YES, but you can call `-[foo unobserveKeyPath:@keyPath(foo.name)]` to manually do the clean-up when you finish the observing. 
+Theoretically YES, but you can call `-[foo unobserve...]` to manually do the clean-up when you finish the observing. 
 
 <br>
 

@@ -87,8 +87,8 @@ Context: 0x0'
 还可以这样写（推荐）：
 
 ```
-[foo observeKeyPath:@keyPath(foo.name)
-            options:YJKeyValueObservingOldToNew
+[foo observeKeyPath:@keyPath(foo.name) // <-- 使用@keyPath
+            options:YJKeyValueObservingOldToNew // <-- 使用自定义的option
             changes:^(id  _Nonnull receiver, id  _Nullable newValue, NSDictionary<NSString *,id> * _Nonnull change) {
     			     // foo更新了name的值
             }];

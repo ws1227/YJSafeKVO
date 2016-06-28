@@ -87,8 +87,8 @@ e.g. If I observe foo's property called name when it's name value changes. I cal
 Which is quite simple, but here is a better way (recommended):
 
 ```
-[foo observeKeyPath:@keyPath(foo.name)
-            options:YJKeyValueObservingOldToNew
+[foo observeKeyPath:@keyPath(foo.name) // <-- Using @keyPath
+            options:YJKeyValueObservingOldToNew // <-- Using self-defined symbol
             changes:^(id  _Nonnull receiver, id  _Nullable newValue, NSDictionary<NSString *,id> * _Nonnull change) {
                 // foo changes its name.
             }];

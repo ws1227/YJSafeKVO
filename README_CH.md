@@ -40,7 +40,7 @@ If you prefer reading in English, tap [here](https://github.com/huang-kun/YJSafe
 
 再举个例子：
 
-如果添加了观察者，又不用去观察；或者在观察方法实现中错误调用了`[super observeValueForKeyPath:..]`，也会崩溃。
+如果添加了观察者，又不用去观察，也会崩溃。
 
 ```
 *** Terminating app due to uncaught exception 'NSInternalInconsistencyException', reason: '<Bar: 0x1002000b0>: An -observeValueForKeyPath:ofObject:change:context: message was received but not handled.
@@ -58,42 +58,43 @@ Context: 0x0'
 
 `YJSafeKVO`的目标，就是为已经适应`Cocoa`编程的开发者，提供一套使用简洁的接口，避免由于操作不当而引发不必要的崩溃。
 
+* 支持block参数
+* 会隐式生成观察者，并且自动清理，没有以上崩溃问题
+* 当不需要观察的时候，允许自行停止观察行为
+* 支持在同一个对象的同一个keyPath中添加多次观察行为
+* 支持标记一个（或多个）观察行为，以便自行停止观察的时候指定所要停止的观察行为
+* 支持`NSOperationQueue`用于添加回调block
+* 提供了`@keyPath`静态检查
+
 如果我需要观察foo的属性name，在name的值改变时做出响应，那么我就调用：
 
 ```
-[foo observeKeyPath:@keyPath(foo.name) forChanges:^(id receiver, id oldValue, id newValue) {
-    // 当name的值在未来改变的时候，这里会执行
-    // 可以使用oldValue和newValue
-}
+[foo observeKeyPath:@"name"
+            options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew
+            changes:^(id  _Nonnull receiver, id  _Nullable newValue, NSDictionary<NSString *,id> * _Nonnull change) {
+    			     // foo更新了name的值
+            }];
 ```
 
-如果我需要观察foo的属性name，想要在观察后立即回调响应，那么我就调用：
+还可以这样写（推荐）：
 
 ```
-[foo observeKeyPath:@keyPath(foo.name) forUpdates:^(id receiver, id newValue) {
-    // 在开始观察后，这里会立刻执行
-    // 当值被更新后，这里也会立刻执行
-}
+[foo observeKeyPath:@keyPath(foo.name)
+            options:YJKeyValueObservingOldToNew
+            changes:^(id  _Nonnull receiver, id  _Nullable newValue, NSDictionary<NSString *,id> * _Nonnull change) {
+    			     // foo更新了name的值
+            }];
 ```
 
-调用这些API，会隐式生成观察者，并很好的在内部被组织和管理。由于它们不被暴露，就使得`KVO`的对外接口变得简洁和好用。但是当被观察者(foo)被释放的话会发生什么呢？这些观察者则会在被观察者被释放之前，首先被全部移除，因此不会产生崩溃。
+调用`YJSafeKVO`提供的API，会隐式生成观察者，并很好的在内部被组织和管理。由于它们不被暴露，就使得`KVO`的对外接口变得简洁和好用。但是当被观察者(foo)被释放的话会发生什么呢？这些观察者则会在被观察者被释放之前，首先被全部移除，因此不会产生崩溃。
 
 <br>
 
 #### 关于疑虑
 
-* 调用`-observeKeyPath:forChanges:`和`-observeKeyPath:forUpdates:`具体有什么区别 ？
+* 为什么要定义`YJKeyValueObservingOldToNew`和`YJKeyValueObservingUpToDate` ？
 
-举个例子：如果你通过`-observeKeyPath:forChanges:`观察值的变化，那么变化只会发生在未来。如果你希望在当前就要通过观察的值来更新UI的话，那就得在调用`KVO`方法之前先更新UI，然后还要在`KVO`的block里面再根据新的值来更新UI
-
-```
-[self updateUserInterfaceWithName:foo.name];
-[foo observeKeyPath:@keyPath(foo.name) forChanges:^(id receiver, id oldValue, id newValue) {
-    [weakSelf updateUserInterfaceWithName:foo.name]; 
-}
-```
-
-调用`-observeKeyPath:forUpdates:`就可以替换上面的代码，更新一下方法名，然后只要将更新UI的方法集中到block里面就可以了。
+因为个人原因，会常用到这两个值。比如`YJKeyValueObservingOldToNew`其实就是替代了`NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew`，而每次又懒得写上一堆文字来表示一个组合值，希望代码能更简短些。而`YJKeyValueObservingUpToDate`则表示`.Initial | .New`，意味着使用后block会立即收到回调。
 
 <br>
 
@@ -108,9 +109,13 @@ Context: 0x0'
 比如你观察的属性在其他线程中被赋值，但是你期望block能在主线程中回调并且更新UI。你可以使用另一个API，专门指定一个`NSOperationQueue`对象作为参数用于回调。
 
 ```
-[foo observeKeyPath:@keyPath(foo.name) identifier:nil queue:[NSOperationQueue mainQueue] forChanges:^(id receiver, id oldValue, id newValue) {
-    // 这样回调将在主线程中执行
-}];
+[foo observeKeyPath:@keyPath(foo.name)
+            options:YJKeyValueObservingOldToNew
+         identifier:nil
+              queue:[NSOperationQueue mainQueue]
+            changes:^(id  _Nonnull receiver, id  _Nullable newValue, NSDictionary<NSString *,id> * _Nonnull change) {
+                // 回调将在主线程中执行
+            }];
 ```
 
 如果你对`NSNotificationCenter`的`-addObserverForName:object:queue:usingBlock:`不陌生的话，那么使用上面的方法就不成问题了。
@@ -127,7 +132,7 @@ Context: 0x0'
 
 设想一下这个情况：现在有个单例对象的同一个属性被很多其他对象所观察着，当其中一个对象结束观察以后，如果调用`[singleton unobserveKeyPath:]`的话，会导致观察这个属性的所有观察者都被释放，那么其他的对象也就无法继续进行观察了。
 
-为了解决这个问题，需要调用`[singleton observeKeyPath:identifier:queue:forChanges/Updates:]`，然后为每个或者一组观察行为指定一个identifier作为标记，当结束观察的时候，调用`[singleton unobserveKeyPath:forIdentifier:]`并指定标记的话，那么只有对应了标记的观察行为（或者说观察者）才会被释放，因而不会影响其他对象的观察。
+为了解决这个问题，需要调用`[singleton observeKeyPath:options:identifier:queue:changes:]`，然后为每个或者一组观察行为指定一个identifier作为标记，当结束观察的时候，调用`[singleton unobserveKeyPath:forIdentifier:]`并指定标记的话，那么只有对应了标记的观察行为（或者说观察者）才会被释放，因而不会影响其他对象的观察。
 
 当你调用任何带有`unobserve..`前缀的方法时，它所做的只是清除由`YJSafeKVO`隐式生成的观察者，而不会好心地去帮你清理其他的观察者（比如你自己使用系统提供的方法或者其他第三方库的方法创建的观察者）。
 

@@ -39,7 +39,7 @@ e.g. If you need to add multiple observers, you must make sure that you will rem
 
 Another example:
 
-e.g. If you call -addObserver:keyPath:.., and not observing, or call -[super observeValueForKeyPath:..] not properly, it crashes.
+e.g. If you call -addObserver:keyPath:.., and not observing, it crashes.
 
 ```
 *** Terminating app due to uncaught exception 'NSInternalInconsistencyException', reason: '<Bar: 0x1002000b0>: An -observeValueForKeyPath:ofObject:change:context: message was received but not handled.
@@ -57,25 +57,35 @@ Despite the usability and safefy, KVO is still important. As a developer, I just
 
 The goal for `YJSafeKVO` is to provide a simple set of APIs that can prevent the general KVO crashes by developers, and also extremely easy to use.
 
+* It's block based API.
+* Observers are generated implicitly and removed automatically. No crashes above.
+* Allow manually unobserving key path when you finish the task.
+* Support multiple observing actions on same object with same key path.
+* Support identifying each (or multiple) observing actions for manually unobserving specific action later.
+* Support `NSOperationQueue` for adding callback block.
+* Provide `@keyPath` for key path compile time validation.
+
 e.g. If I observe foo's property called name when it's name value changes. I call this:
 
 ```
-[foo observeKeyPath:@keyPath(foo.name) forChanges:^(id receiver, id oldValue, id newValue) {
-    // when foo.name's value changes in the future, the block gets called.
-    // so do something with the old name and new name.
-}
+[foo observeKeyPath:@"name"
+            options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew
+            changes:^(id  _Nonnull receiver, id  _Nullable newValue, NSDictionary<NSString *,id> * _Nonnull change) {
+                // foo changes its name.
+            }];
 ```
 
-e.g. If I observe foo.name, and I want to get immediately callback, I call this:
+Which is quite simple, but there is a better way (recommended):
 
 ```
-[foo observeKeyPath:@keyPath(foo.name) forUpdates:^(id receiver, id newValue) {
-    // the block gets immediately called when start observing.
-    // the block will also gets called when new value is applied.
-}
+[foo observeKeyPath:@keyPath(foo.name)
+            options:YJKeyValueObservingOldToNew
+            changes:^(id  _Nonnull receiver, id  _Nullable newValue, NSDictionary<NSString *,id> * _Nonnull change) {
+                // foo changes its name.
+            }];
 ```
 
-Calling these APIs will generate observers implicitly and they are managed internally. Because they are not exposed, the KVO code base will become mush simpler. But what happened if foo is deallocated in the future? All observers is guaranteed to be removed before receiver's deallocation. No crashes.
+Calling APIs provided by `YJSafeKVO` will generate observers implicitly and they are managed internally. Because they are not exposed, the KVO code base will become mush simpler. But what happened if foo is deallocated in the future? All observers is guaranteed to be removed before receiver's deallocation. No crashes.
 
 <br>
 
@@ -83,16 +93,9 @@ Calling these APIs will generate observers implicitly and they are managed inter
 
 * What's the difference between `-observeKeyPath:forChanges:` and `-observeKeyPath:forUpdates:` ?
 
-Here is an example: If you observe the value changes by calling `-observeKeyPath:forChanges:`, the change may happen in the future. What about if you want to update UI depending on the current value. Then you may updating before the observing and updating again for value changes. 
+* Why defining `YJKeyValueObservingOldToNew` and `YJKeyValueObservingUpToDate` ?
 
-```
-[self updateUserInterfaceWithName:foo.name];
-[foo observeKeyPath:@keyPath(foo.name) forChanges:^(id receiver, id oldValue, id newValue) {
-    [weakSelf updateUserInterfaceWithName:foo.name]; 
-}
-```
-
-Calling `-observeKeyPath:forUpdates:` is helpful for replacing the code like this. Just change the method name and put all updating logics inside of block to organize code in one place.
+Personally, I use them a lot. Instead of typing `NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew` everytime for option parameter, I'd like to make a nice symbol as `YJKeyValueObservingOldToNew` to represent observing value changes from old to new. It's just about making code shorter. Another symbol `YJKeyValueObservingUpToDate` represent `.Initial | .New`, which means the block will be called immediately.
 
 <br>
 
@@ -107,9 +110,13 @@ It's the feature for key path validation during compile time. Since `#keyPath` w
 For example if your observed property is being set with new value on one thread, and you expect to update UI with new value in the callback block executed on main thread. You can use the extended API for specifing a `NSOperationQueue` parameter.
 
 ```
-[foo observeKeyPath:@keyPath(foo.name) identifier:nil queue:[NSOperationQueue mainQueue] forChanges:^(id receiver, id oldValue, id newValue) {
-    // perform on main thread
-}];
+[foo observeKeyPath:@keyPath(foo.name)
+            options:YJKeyValueObservingOldToNew
+         identifier:nil
+              queue:[NSOperationQueue mainQueue]
+            changes:^(id  _Nonnull receiver, id  _Nullable newValue, NSDictionary<NSString *,id> * _Nonnull change) {
+                // callback on main thread
+            }];
 ```
 
 If you are familiar with `-addObserverForName:object:queue:usingBlock:` for `NSNotificationCenter`, then there is no barrier for using this API.
@@ -126,7 +133,7 @@ Theoretically YES, but you can call `-[foo unobserveKeyPath:@keyPath(foo.name)]`
 
 Think about this case: There are multiple objects observing the property of the singleton object (which is never being released), and you call `[singleton unobserveKeyPath:]` after one of objects is done observing. The singleton object will remove all observers which related to that key path, which will cause other objects can not be able to keep observing the same key path continuously.
 
-To solve the problem, calling `[singleton observeKeyPath:identifier:queue:forChanges/Updates:]` to pass a unique string as an identifier for each observing operation or a group of operations by the same object. Then you can call `[singleton unobserveKeyPath:forIdentifier:]` which will only stop observing operations and remove observers which match the identifier you specified. This is a fine-grain control for performing manually clean-up without side-effect.
+To solve the problem, calling `[singleton observeKeyPath:options:identifier:queue:changes:]` to pass a unique string as an identifier for each observing operation or a group of operations by the same object. Then you can call `[singleton unobserveKeyPath:forIdentifier:]` which will only stop observing operations and remove observers which match the identifier you specified. This is a fine-grain control for performing manually clean-up without side-effect.
 
 After you call `-unobserve...` prefixed methods, it only help you clean up the observers which generated by `YJSafeKVO`, and not go the extra mile for removing other observers which created by other approaches (if you are using system APIs or other third party APIs).
 

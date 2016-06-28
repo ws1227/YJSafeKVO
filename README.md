@@ -13,11 +13,20 @@
 
 ### Problems
 
-The key value observing pattern is really important for the Cocoa and Cocoa Touch programming. You add an observer, observe the value changes, remove it when you finish. However, if you not use it correctly, the results are basically crashes.
-
-First example: 
+The key value observing pattern is really important for the Cocoa and Cocoa Touch programming. You add an observer, observe the value changes, remove it when you finish. 
 
 (Assuming foo and bar are both instance objects and their classes are subclasses of NSObject)
+
+
+```
+[foo addObserver:bar forKeyPath:@"name" options:NSKeyValueObservingOptionNew context:NULL];
+// handle value changes in other place of your code.
+[foo removeObserver:bar forKeyPath:@"name"];
+```
+
+However, if you not use it correctly, the results are basically crashes.
+
+First example: 
 
 e.g. When you add an observer bar to observe foo's property, and forget to remove bar before foo gets deallocated. Then you get this crash log:
 

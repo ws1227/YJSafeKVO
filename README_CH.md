@@ -13,11 +13,19 @@ If you prefer reading in English, tap [here](https://github.com/huang-kun/YJSafe
 
 ### 先来吐槽
 
-在`Cocoa`和`Cocoa Touch`编程中，`KVO`的范式一直扮演着重要的角色：你需要添加观察者、观察属性值的改变、移除观察者。如果实现的稍有差错，那么结果基本就是崩溃。
-
-举个例子：
+在`Cocoa`和`Cocoa Touch`编程中，`KVO`的范式一直扮演着重要的角色：你需要添加观察者、观察属性值的改变、移除观察者。
 
 （假设foo和bar都是实例变量，他们的类继承自NSObject）
+
+```
+[foo addObserver:bar forKeyPath:@"name" options:NSKeyValueObservingOptionNew context:NULL];
+// 还要去其他地方实现处理观察值的变化
+[foo removeObserver:bar forKeyPath:@"name"];
+```
+
+如果实现的稍有差错，那么结果基本就是崩溃。
+
+举个例子：
 
 当你需要观察foo的某个属性时，添加了bar作为观察者，但是忘了在foo被销毁前移除bar的话，于是你就收获了一份的崩溃日志：
 

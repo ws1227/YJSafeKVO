@@ -11,7 +11,7 @@ If you prefer reading in English, tap [here](https://github.com/huang-kun/YJSafe
 
 <br>
 
-#### 先来吐槽
+### 先来吐槽
 
 在`Cocoa`和`Cocoa Touch`编程中，`KVO`的范式一直扮演着重要的角色：你需要添加观察者、观察属性值的改变、移除观察者。如果实现的稍有差错，那么结果基本就是崩溃。
 
@@ -52,7 +52,7 @@ Context: 0x0'
 
 <br>
 
-#### 解决方案
+### 解决方案
 
 虽然不管这些API是有多么的难用跟危险，`KVO`本身还是相当的重要。但是作为一名开发者，我只不过想调用一些简单的方法来完成目的而已。于是这里给出了解决方法：
 
@@ -90,21 +90,21 @@ Context: 0x0'
 
 <br>
 
-#### 关于疑虑
+### 关于疑虑
 
-* 为什么要定义`YJKeyValueObservingOldToNew`和`YJKeyValueObservingUpToDate` ？
+#### 为什么要定义`YJKeyValueObservingOldToNew`和`YJKeyValueObservingUpToDate` ？
 
 因为个人原因，会常用到这两个值。比如`YJKeyValueObservingOldToNew`其实就是替代了`NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew`，而每次又懒得写上一堆文字来表示一个组合值，希望代码能更简短些。而`YJKeyValueObservingUpToDate`则表示`.Initial | .New`，意味着使用后block会立即收到回调。
 
 <br>
 
-* 这个`@keyPath`是神马 ?
+#### 这个`@keyPath`是神马 ?
 
 它具有静态检查`key path`的特性（不用填写字符串对象，然后等到运行时再去判断）。自从苹果宣布`Swift 3`将支持`#keyPath`的特性以后，可以得出一个结论：对于`key path`的静态检查不仅能够保证代码安全，并且也会成为趋势。在`Objective C`中使用`@keyPath`就跟使用`@selector`差不多是一个道理。
 
 <br>
 
-* 如果牵扯进了其他线程该怎么办 ？
+#### 如果牵扯进了其他线程该怎么办 ？
 
 比如你观察的属性在其他线程中被赋值，但是你期望block能在主线程中回调并且更新UI。你可以使用另一个API，专门指定一个`NSOperationQueue`对象作为参数用于回调。
 
@@ -122,13 +122,13 @@ Context: 0x0'
 
 <br>
 
-* 假如被观察者一直不被释放的话，那么所有产生的观察者就一直不被释放喽 ？
+#### 假如被观察者一直不被释放的话，那么所有产生的观察者就一直不被释放喽 ？
 
 理论上说是的，不过当你完成观察任务后，你可以调用`-[foo unobserveKeyPath:@keyPath(foo.name)]`来自行清理观察者。
 
 <br>
 
-* 对于使用`YJSafeKVO`提供的接口还需要注意哪些问题呢 ?
+#### 对于使用`YJSafeKVO`提供的接口还需要注意哪些问题呢 ?
 
 1. 在回调block中，默认会带有一个`newValue`的参数，但是不包含`oldValue`，如果需要的话，可以从change字典中获取。
 
@@ -140,7 +140,7 @@ Context: 0x0'
 
 <br>
 
-#### 兼容情况
+### 兼容情况
 
 由于`KVO`是源于`Cocoa`编程的范式，因此只要被观察的对象继承于`NSObject`的话，它自然会与生俱来这种特性，但是对于`Swift`来说，`struct`以及基类不属于`NSObject`的实例对象就无法使用`KVO`了。
 

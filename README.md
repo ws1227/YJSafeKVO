@@ -11,7 +11,7 @@
 
 <br>
 
-#### Problems
+### Problems
 
 The key value observing pattern is really important for the Cocoa and Cocoa Touch programming. You add an observer, observe the value changes, remove it when you finish. However, if you not use it correctly, the results are basically crashes.
 
@@ -51,7 +51,7 @@ Context: 0x0'
 
 <br>
 
-#### Solutions
+### Solutions
 
 Despite the usability and safefy, KVO is still important. As a developer, I just want to use some simple APIs to achieve the goal. Here comes `YJSafeKVO`:
 
@@ -89,21 +89,21 @@ Calling APIs provided by `YJSafeKVO` will generate observers implicitly and they
 
 <br>
 
-#### Questions
+### Questions
 
-* Why defining `YJKeyValueObservingOldToNew` and `YJKeyValueObservingUpToDate` ?
+#### Why defining `YJKeyValueObservingOldToNew` and `YJKeyValueObservingUpToDate` ?
 
 Personally, I use them a lot. Instead of typing `NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew` everytime for option parameter, I'd like to make a nice symbol as `YJKeyValueObservingOldToNew` to represent observing value changes from old to new. It's just about making code shorter. Another symbol `YJKeyValueObservingUpToDate` represent `.Initial | .New`, which means the block will be called immediately.
 
 <br>
 
-* What's `@keyPath` ?
+#### What's `@keyPath` ?
 
 It's the feature for key path validation during compile time. Since `#keyPath` will be supported for Swift 3 by Apple officially, it is clear that key path compile checking is not only provide safe code, but also becoming the trend now. Use it as similar as using `@selector(..)` in Objective C.
 
 <br>
 
-* What about the case when multiple threads are involved ?
+#### What about the case when multiple threads are involved ?
 
 For example if your observed property is being set with new value on one thread, and you expect to update UI with new value in the callback block executed on main thread. You can use the extended API for specifing a `NSOperationQueue` parameter.
 
@@ -121,13 +121,13 @@ If you are familiar with `-addObserverForName:object:queue:usingBlock:` for `NSN
 
 <br>
 
-* What happen if the receiver is never deallocated ? Are these implicit generated receivers is gonna keep alive forever ?
+#### What happen if the receiver is never deallocated ? Are these implicit generated receivers is gonna keep alive forever ?
 
 Theoretically YES, but you can call `-[foo unobserveKeyPath:@keyPath(foo.name)]` to manually do the clean-up when you finish the observing. 
 
 <br>
 
-* What other things that you might want to know for using YJSafeKVO's APIs ?
+#### What other things that you might want to know for using YJSafeKVO's APIs ?
 
 1. the callback block always contain a newValue parameter, but no oldValue parameter by default. If you need the old value, you can get from change dictionary.
 
@@ -139,7 +139,7 @@ Theoretically YES, but you can call `-[foo unobserveKeyPath:@keyPath(foo.name)]`
 
 <br>
 
-#### Compatibility
+### Compatibility
 
 The key value observing is the pattern from Cocoa programming. Any object as subclass of NSObject will get it for free. It also means this feature is not applied for Swift's struct, and for it's class object which root class is not NSObject.
 

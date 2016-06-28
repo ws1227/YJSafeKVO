@@ -32,7 +32,7 @@ e.g. When you add an observer bar to observe foo's property, and forget to remov
 
 ```
 *** Terminating app due to uncaught exception 'NSInternalInconsistencyException', reason: 'An instance 0x100102560 of class Foo was deallocated while key value observers were still registered with it. Current observation info: <NSKeyValueObservationInfo 0x100104990> (
-<NSKeyValueObservance 0x100104770: Observer: 0x100102f30, Key path: count, Options: <New: YES, Old: YES, Prior: NO> Context: 0x0, Property: 0x100100340>
+<NSKeyValueObservance 0x100104770: Observer: 0x100102f30, Key path: name, Options: <New: YES, Old: YES, Prior: NO> Context: 0x0, Property: 0x100100340>
 )'
 ```
 
@@ -43,7 +43,7 @@ Another example:
 e.g. If you need to add multiple observers, you must make sure that you will remove them correctly. If you miss one, it crashes; if you remove the wrong one, it crashes.
 
 ```
-*** Terminating app due to uncaught exception 'NSRangeException', reason: 'Cannot remove an observer <Bar 0x100202de0> for the key path "count" from <Foo 0x100202ac0> because it is not registered as an observer.'
+*** Terminating app due to uncaught exception 'NSRangeException', reason: 'Cannot remove an observer <Bar 0x100202de0> for the key path "name" from <Foo 0x100202ac0> because it is not registered as an observer.'
 ```
 
 Another example:
@@ -52,7 +52,7 @@ e.g. If you call -addObserver:keyPath:.., and not observing, it crashes.
 
 ```
 *** Terminating app due to uncaught exception 'NSInternalInconsistencyException', reason: '<Bar: 0x1002000b0>: An -observeValueForKeyPath:ofObject:change:context: message was received but not handled.
-Key path: count
+Key path: name
 Observed object: <Foo: 0x100200080>
 Change: { kind = 1; new = 1; old = 0; }
 Context: 0x0'

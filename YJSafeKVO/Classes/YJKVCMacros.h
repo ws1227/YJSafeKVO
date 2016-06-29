@@ -15,6 +15,11 @@
 
 /**
  @code
+ 
+ @keyPath(foo.name)  -->  @"name"
+ @keyPath(foo.name.length)  -->  @"name.length"
+ 
+ 
  // It's not safe to use string literal for key path as method parameter. The reasons are:
  // 1. No compiler warning when key path is invalid.
  // 2. No compiler warning when property name get changed in the future.
@@ -32,6 +37,7 @@
  // Thanks to Justin Spahr-Summers for great extobjc with EXTKeyPathCoding and David Hart for introducing #keyPath in swift 3.
  // https://github.com/jspahrsummers/libextobjc/blob/master/extobjc/EXTKeyPathCoding.h
  // https://github.com/apple/swift-evolution/blob/master/proposals/0062-objc-keypaths.md
+ 
  @endcode
  */
 

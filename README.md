@@ -77,21 +77,9 @@ The goal for `YJSafeKVO` is to provide a simple set of APIs that can prevent the
 e.g. If I observe foo's property called name when it's name value changes. I call this:
 
 ```
-[foo observeKeyPath:@"name"
-            options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew
-            changes:^(id  _Nonnull receiver, id  _Nullable newValue, NSDictionary<NSString *,id> * _Nonnull change) {
-                // foo changes its name.
-            }];
-```
-
-Which is quite simple, but here is a better way (recommended):
-
-```
-[foo observeKeyPath:@keyPath(foo.name) // <-- Using @keyPath
-            options:YJKeyValueObservingOldToNew // <-- Using self-defined symbol
-            changes:^(id  _Nonnull receiver, id  _Nullable newValue, NSDictionary<NSString *,id> * _Nonnull change) {
-                // foo changes its name.
-            }];
+[foo observeKeyPath:@"name" changes:^(id  _Nonnull receiver, id  _Nullable newValue) {
+    // NSLog(@"%@ has a new name: %@", receiver, newValue);
+}];
 ```
 
 <br>
@@ -131,6 +119,8 @@ Personally, I use them a lot. Instead of typing `NSKeyValueObservingOptionOld | 
 #### What's `@keyPath` ?
 
 It's the feature for key path validation during compile time. Since `#keyPath` will be supported for Swift 3 by Apple officially, it is clear that key path compile checking is not only provide safe code, but also becoming the trend now. Use it as similar as using `@selector(..)` in Objective C.
+
+Replacing `[foo observeKeyPath:@"name" ...]` with `[foo observeKeyPath:@keyPath(foo.name) ...]`. The `@keyPath` only delete first path component and keep the rest. So do not use `self.foo.name` for key path validation because it will be truncated like @"foo.name" as key path parameter and make things go wrong. See `YJKVCMacros.h` for more information.
 
 <br>
 

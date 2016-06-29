@@ -16,9 +16,11 @@
 #import "NSObject+YJSafeKVO.h"
 #import "NSObject+YJRuntimeEncapsulation.h"
 
+#define DEBUG_YJ_SAFE_KVO 0
+
 static const void *YJKVOAssociatedKVOMKey = &YJKVOAssociatedKVOMKey;
 
-typedef void(^YJKVOHandler)(id object, id newValue, id changes);
+typedef void(^YJKVOHandler)(id object, id newValue, id change);
 
 NSKeyValueObservingOptions const YJKeyValueObservingOldToNew = (NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew);
 NSKeyValueObservingOptions const YJKeyValueObservingUpToDate = (NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew);
@@ -59,6 +61,14 @@ __attribute__((visibility("hidden")))
         kvoCallbackBlock();
     }
 }
+
+#if DEBUG_YJ_SAFE_KVO
+
+- (void)dealloc {
+    NSLog(@"%@ deallocated.", self);
+}
+
+#endif
 
 @end
 
@@ -171,6 +181,14 @@ __attribute__((visibility("hidden")))
     dispatch_semaphore_signal(_semaphore);
 }
 
+#if DEBUG_YJ_SAFE_KVO
+
+- (void)dealloc {
+    NSLog(@"%@ deallocated.", self);
+}
+
+#endif
+
 @end
 
 
@@ -239,6 +257,14 @@ static void _yj_modifyDealloc(__kindof NSObject *self) {
 }
 
 /* -------------------- Public APIs ------------------- */
+
+- (void)observeKeyPath:(NSString *)keyPath changes:(void(^)(id receiver, id _Nullable newValue))changes {
+    void(^handler)(id, id, id) = ^(id obj, id newVal, id change){
+        if (changes) changes(obj, newVal);
+    };
+    _yj_registerKVO(self, keyPath, NSKeyValueObservingOptionNew, nil, nil, handler);
+    _yj_modifyDealloc(self);
+}
 
 - (void)observeKeyPath:(NSString *)keyPath
                options:(NSKeyValueObservingOptions)options

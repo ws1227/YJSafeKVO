@@ -21,15 +21,25 @@ FOUNDATION_EXTERN NSKeyValueObservingOptions const YJKeyValueObservingUpToDate;
 
 /**
  *  @brief      Key-Value observing the key path and execute the handler block when observed value changes.
- *
- *  @discussion This method performs as same as add observer with options (NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew).
-                 The observer will be generated implicitly and it's safe for not removing observer explicitly because eventually observer
-                 will be removed before receiver gets deallocated. It's vaild to use it multiple times for applying different changes
-                 block with same key path.
+ *  @discussion This method performs as same as observing with options NSKeyValueObservingOptionNew.
  
- *  @remark     The handler block captures inner objects while the receiver is alive.
- *  @see        \@keyPath in YJKVCMacros.h
- *
+ The observer will be generated implicitly and it's safe for not removing observer explicitly because eventually observer
+ will be removed before receiver gets deallocated. It's vaild to use it multiple times for applying different changes
+ block with same key path.
+ 
+ *  @param keyPath  The key path, relative to the array, of the property to observe. This value must not be nil.
+ *  @param changes  The block of code will be performed when observed value changes.
+ */
+- (void)observeKeyPath:(NSString *)keyPath changes:(void(^)(id receiver, id _Nullable newValue))changes;
+
+
+/**
+ *  @brief      Key-Value observing the key path and execute the handler block when observed value changes.
+ 
+ The observer will be generated implicitly and it's safe for not removing observer explicitly because eventually observer
+ will be removed before receiver gets deallocated. It's vaild to use it multiple times for applying different changes
+ block with same key path.
+ 
  *  @param keyPath  The key path, relative to the array, of the property to observe. This value must not be nil.
  *  @param options  A combination of the NSKeyValueObservingOptions values that specifies what is included in observation notifications.
  *  @param changes  The block of code will be performed when observed value changes.
@@ -41,15 +51,11 @@ FOUNDATION_EXTERN NSKeyValueObservingOptions const YJKeyValueObservingUpToDate;
 
 /**
  *  @brief      Key-Value observing the key path and execute the handler block when observed value changes.
- *
- *  @discussion This method performs as same as add observer with options (NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew).
-                 The observer will be generated implicitly and it's safe for not removing observer explicitly because eventually observer
-                 will be removed before receiver gets deallocated. It's vaild to use it multiple times for applying different changes
-                 block with same key path.
  
- *  @remark     The handler block captures inner objects while the receiver is alive.
- *  @see        \@keyPath in YJKVCMacros.h
- *
+ The observer will be generated implicitly and it's safe for not removing observer explicitly because eventually observer
+ will be removed before receiver gets deallocated. It's vaild to use it multiple times for applying different changes
+ block with same key path.
+ 
  *  @param keyPath      The key path, relative to the array, of the property to observe. This value must not be nil.
  *  @param options      A combination of the NSKeyValueObservingOptions values that specifies what is included in observation notifications.
  *  @param identifier   The string for identifying the current observing operation.
@@ -65,18 +71,15 @@ FOUNDATION_EXTERN NSKeyValueObservingOptions const YJKeyValueObservingUpToDate;
 
 /**
  *  @brief Stops observing property specified by a given key-path relative to the receiver.
- *
- *  @note  If you don't call this method when finish key value observing. All implicit generated observers will be removed from receiver
-             before receiver is deallocated. The internal observers will keep alive as long as receiver is alive. This method is for the
-             case when receiver is alive and you've done the obverving job. You can call this to manually remove all observers, then the
-             block you've used for key value observing method will be released as well.
  
- @note  If you observe the same key path multiple times for different reason, you call -unobserveKeyPath: only once is good.
+ If you don't call this method when finish key value observing. All implicit generated observers will be removed from receiver
+ before receiver is deallocated. The internal observers will keep alive as long as receiver is alive. This method is for the
+ case when receiver is alive and you've done the obverving job. You can call this to manually remove all observers, then the
+ block you've used for key value observing method will be released as well.
  
- @note  Calling this method only remove observers which generated by method -observeKeyPath:... provided by YJKit, and not remove
+ *  @note  If you observe the same key path multiple times for different reason, you call -unobserveKeyPath: only once is good.
+ *  @note  Calling this method only remove observers which generated by method -observeKeyPath:... provided by YJKit, and not remove
  observers which generated by other APIs if you are using (Whether they are system provided or from other 3rd-party libraries).
- 
- *  @see   \@keyPath in YJKVCMacros.h
  
  *  @param keyPath       The key path, relative to the array, of the property to observe. This value must not be nil.
  */
@@ -85,18 +88,15 @@ FOUNDATION_EXTERN NSKeyValueObservingOptions const YJKeyValueObservingUpToDate;
 
 /**
  *  @brief Stops observing property specified by an identifier for given key-path relative to the receiver.
- *
- *  @note  If you don't call this method when finish key value observing. All implicit generated observers will be removed from receiver
-             before receiver is deallocated. The internal observers will keep alive as long as receiver is alive. This method is for the
-             case when receiver is alive and you've done the obverving job. You can call this to manually remove all observers, then the
-             block you've used for key value observing method will be released as well.
  
- @note  If you observe the same key path multiple times for different reason, you call -unobserveKeyPath: only once is good.
+ If you don't call this method when finish key value observing. All implicit generated observers will be removed from receiver
+ before receiver is deallocated. The internal observers will keep alive as long as receiver is alive. This method is for the
+ case when receiver is alive and you've done the obverving job. You can call this to manually remove all observers, then the
+ block you've used for key value observing method will be released as well.
  
- @note  Calling this method only remove observers which generated by method -observeKeyPath:... provided by YJKit, and not remove
+ *  @note  If you observe the same key path multiple times for different reason, you call -unobserveKeyPath: only once is good.
+ *  @note  Calling this method only remove observers which generated by method -observeKeyPath:... provided by YJKit, and not remove
  observers which generated by other APIs if you are using (Whether they are system provided or from other 3rd-party libraries).
- 
- *  @see   \@keyPath in YJKVCMacros.h
  
  *  @param keyPath       The key path, relative to the array, of the property to observe. This value must not be nil.
  *  @param identifier    The string represents the observing operation.
@@ -107,12 +107,12 @@ FOUNDATION_EXTERN NSKeyValueObservingOptions const YJKeyValueObservingUpToDate;
 /**
  *  @brief Stops observing all properties relative to the receiver.
  
- *  @note  If you don't call this method when finish key value observing. All implicit generated observers will be removed from receiver
-             before receiver is deallocated. The internal observers will keep alive as long as receiver is alive. This method is for the
-             case when receiver is alive and you've done the obverving job. You can call this to manually remove all observers, then the
-             block you've used for key value observing method will be released as well.
+ If you don't call this method when finish key value observing. All implicit generated observers will be removed from receiver
+ before receiver is deallocated. The internal observers will keep alive as long as receiver is alive. This method is for the
+ case when receiver is alive and you've done the obverving job. You can call this to manually remove all observers, then the
+ block you've used for key value observing method will be released as well.
  
- @note  Calling this method only remove observers which generated by method -observeKeyPath:... provided by YJKit, and not remove
+ *  @note  Calling this method only remove observers which generated by method -observeKeyPath:... provided by YJKit, and not remove
  observers which generated by other APIs if you are using (Whether they are system provided or from other 3rd-party libraries).
  */
 - (void)unobserveAllKeyPaths;

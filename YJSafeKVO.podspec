@@ -5,7 +5,7 @@ Pod::Spec.new do |s|
   s.version          = '1.0.4'
   s.summary          = 'A simple and safe key value observing pattern for Cocoa programming.'
   s.description      = <<-DESC
-Using YJSafeKVO is a simple, better way for implementing key value observing.
+                       Using YJSafeKVO is a simple, better way for implementing key value observing.
                        DESC
 
   s.homepage         = 'https://github.com/huang-kun/YJSafeKVO'

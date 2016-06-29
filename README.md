@@ -110,12 +110,6 @@ To avoid this issue:
 
 ### Questions
 
-#### Why defining `YJKeyValueObservingOldToNew` and `YJKeyValueObservingUpToDate` ?
-
-Personally, I use them a lot. Instead of typing `NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew` everytime for option parameter, I'd like to make a nice symbol as `YJKeyValueObservingOldToNew` to represent observing value changes from old to new. It's just about making code shorter. Another symbol `YJKeyValueObservingUpToDate` represent `.Initial | .New`, which means the block will be called immediately.
-
-<br>
-
 #### What's `@keyPath` ?
 
 It's the feature for key path validation during compile time. Since `#keyPath` will be supported for Swift 3 by Apple officially, it is clear that key path compile checking is not only provide safe code, but also becoming the trend now. Use it as similar as using `@selector(..)` in Objective C.
@@ -130,7 +124,7 @@ For example if your observed property is being set with new value on one thread,
 
 ```
 [foo observeKeyPath:@keyPath(foo.name)
-            options:YJKeyValueObservingOldToNew
+            options:NSKeyValueObservingOptionNew
          identifier:nil
               queue:[NSOperationQueue mainQueue]
             changes:^(id  _Nonnull receiver, id  _Nullable newValue, NSDictionary<NSString *,id> * _Nonnull change) {

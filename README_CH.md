@@ -77,21 +77,9 @@ Context: 0x0'
 如果我需要观察foo的属性name，在name的值改变时做出响应，那么我就调用：
 
 ```
-[foo observeKeyPath:@"name"
-            options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew
-            changes:^(id  _Nonnull receiver, id  _Nullable newValue, NSDictionary<NSString *,id> * _Nonnull change) {
-    			     // foo更新了name的值
-            }];
-```
-
-还可以这样写（推荐）：
-
-```
-[foo observeKeyPath:@keyPath(foo.name) // <-- 使用@keyPath
-            options:YJKeyValueObservingOldToNew // <-- 使用自定义的option
-            changes:^(id  _Nonnull receiver, id  _Nullable newValue, NSDictionary<NSString *,id> * _Nonnull change) {
-    			     // foo更新了name的值
-            }];
+[foo observeKeyPath:@"name" changes:^(id  _Nonnull receiver, id  _Nullable newValue) {
+    // NSLog(@"%@ 有了新的名字: %@", receiver, newValue);
+}];
 ```
 
 <br>
@@ -122,15 +110,11 @@ Context: 0x0'
 
 ### 关于疑虑
 
-#### 为什么要定义`YJKeyValueObservingOldToNew`和`YJKeyValueObservingUpToDate` ？
-
-因为个人原因，会常用到这两个值。比如`YJKeyValueObservingOldToNew`其实就是替代了`NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew`，而每次又懒得写上一堆文字来表示一个组合值，希望代码能更简短些。而`YJKeyValueObservingUpToDate`则表示`.Initial | .New`，意味着使用后block会立即收到回调。
-
-<br>
-
 #### 这个`@keyPath`是神马 ?
 
 它具有静态检查`key path`的特性（不用填写字符串对象，然后等到运行时再去判断）。自从苹果宣布`Swift 3`将支持`#keyPath`的特性以后，可以得出一个结论：对于`key path`的静态检查不仅能够保证代码安全，并且也会成为趋势。在`Objective C`中使用`@keyPath`就跟使用`@selector`差不多是一个道理。
+
+推荐将代码`[foo observeKeyPath:@"name" ...]` 替换为 `[foo observeKeyPath:@keyPath(foo.name) ...]`，`@keyPath`只会裁剪掉字符串中首个点号前面的部分，所以不要把`self.foo.name`那去做静态检查，否则会生成`foo.name`作为方法的key path的参数而导致出错。具体详见`YJKVCMacros.h`。
 
 <br>
 
@@ -140,7 +124,7 @@ Context: 0x0'
 
 ```
 [foo observeKeyPath:@keyPath(foo.name)
-            options:YJKeyValueObservingOldToNew
+            options:NSKeyValueObservingOptionNew
          identifier:nil
               queue:[NSOperationQueue mainQueue]
             changes:^(id  _Nonnull receiver, id  _Nullable newValue, NSDictionary<NSString *,id> * _Nonnull change) {
@@ -160,7 +144,7 @@ Context: 0x0'
 
 #### 对于使用`YJSafeKVO`提供的接口还需要注意哪些问题呢 ?
 
-1. 在回调block中，默认会带有一个`newValue`的参数，但是不包含`oldValue`，如果需要的话，可以从change字典中获取。
+1. 在回调block中，默认会带有一个`newValue`的参数，但是不包含`oldValue`，如果需要的话，可以从回调block中的change字典里获取。
 
 2. 当你调用任何带有`unobserve..`前缀的方法时，它所做的只是清除由`YJSafeKVO`隐式生成的观察者，而不会好心地去帮你清理其他的观察者（比如你自己使用系统提供的方法或者其他第三方库的方法创建的观察者）。
 

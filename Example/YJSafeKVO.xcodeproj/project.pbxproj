@@ -17,7 +17,7 @@
 
 /* Begin PBXFileReference section */
 		1D4C0DB02D871AE858049770 /* YJSafeKVO.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = YJSafeKVO.podspec; path = ../YJSafeKVO.podspec; sourceTree = "<group>"; };
-		322553AE1D239BF700ABABFC /* README_CH.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README_CH.md; sourceTree = "<group>"; };
+		322553AF1D23A56700ABABFC /* README_CH.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = README_CH.md; path = ../README_CH.md; sourceTree = "<group>"; };
 		35161C4C7F988724A0A93D88 /* Pods-YJSafeKVO_Tests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-YJSafeKVO_Tests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-YJSafeKVO_Tests/Pods-YJSafeKVO_Tests.debug.xcconfig"; sourceTree = "<group>"; };
 		46B060A270C749A017347477 /* Pods-YJSafeKVO_Tests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-YJSafeKVO_Tests.release.xcconfig"; path = "Pods/Target Support Files/Pods-YJSafeKVO_Tests/Pods-YJSafeKVO_Tests.release.xcconfig"; sourceTree = "<group>"; };
 		47A10E5622B037C05BDA65D2 /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
@@ -104,7 +104,7 @@
 			children = (
 				1D4C0DB02D871AE858049770 /* YJSafeKVO.podspec */,
 				89CBAA3F8A2083300C630092 /* README.md */,
-				322553AE1D239BF700ABABFC /* README_CH.md */,
+				322553AF1D23A56700ABABFC /* README_CH.md */,
 				47A10E5622B037C05BDA65D2 /* LICENSE */,
 			);
 			name = "Podspec Metadata";

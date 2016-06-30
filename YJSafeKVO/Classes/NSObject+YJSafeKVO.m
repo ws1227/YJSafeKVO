@@ -103,7 +103,7 @@ __attribute__((visibility("hidden")))
 @implementation _YJKeyValueObserverManager {
     __unsafe_unretained id _owner;
     dispatch_semaphore_t _semaphore;
-    NSMutableDictionary <NSString *, NSMutableSet <_YJKeyValueObserver *> *> *_observers;
+    NSMutableDictionary <NSString *, NSMutableArray <_YJKeyValueObserver *> *> *_observers;
 }
 
 - (instancetype)initWithOwner:(id)owner {
@@ -119,9 +119,9 @@ __attribute__((visibility("hidden")))
 - (void)registerObserver:(_YJKeyValueObserver *)observer forKeyPath:(NSString *)keyPath options:(NSKeyValueObservingOptions)options {
     dispatch_semaphore_wait(_semaphore, DISPATCH_TIME_FOREVER);
     
-    NSMutableSet *observersForKeyPath = _observers[keyPath];
+    NSMutableArray *observersForKeyPath = _observers[keyPath];
     if (!observersForKeyPath) {
-        observersForKeyPath = [NSMutableSet new];
+        observersForKeyPath = [NSMutableArray new];
         _observers[keyPath] = observersForKeyPath;
     }
     [observersForKeyPath addObject:observer];
@@ -131,12 +131,12 @@ __attribute__((visibility("hidden")))
 }
 
 - (void)unregisterObserversForKeyPath:(NSString *)keyPath {
-    NSMutableSet <_YJKeyValueObserver *> *observersForKeyPath = _observers[keyPath];
+    NSMutableArray <_YJKeyValueObserver *> *observersForKeyPath = _observers[keyPath];
     if (!observersForKeyPath.count) return;
     
     dispatch_semaphore_wait(_semaphore, DISPATCH_TIME_FOREVER);
     
-    [observersForKeyPath enumerateObjectsUsingBlock:^(_YJKeyValueObserver * _Nonnull observer, BOOL * _Nonnull stop) {
+    [observersForKeyPath enumerateObjectsUsingBlock:^(_YJKeyValueObserver * _Nonnull observer, NSUInteger idx, BOOL * _Nonnull stop) {
         [_owner removeObserver:observer forKeyPath:keyPath];
     }];
     [_observers removeObjectForKey:keyPath];
@@ -145,20 +145,20 @@ __attribute__((visibility("hidden")))
 }
 
 - (void)unregisterObserversForKeyPath:(NSString *)keyPath withIdentifier:(NSString *)identifier {
-    NSMutableSet <_YJKeyValueObserver *> *observersForKeyPath = _observers[keyPath];
+    NSMutableArray <_YJKeyValueObserver *> *observersForKeyPath = _observers[keyPath];
     if (!observersForKeyPath.count) return;
     
     dispatch_semaphore_wait(_semaphore, DISPATCH_TIME_FOREVER);
     
-    NSMutableSet *collector = [[NSMutableSet alloc] initWithCapacity:observersForKeyPath.count];
-    [observersForKeyPath enumerateObjectsUsingBlock:^(_YJKeyValueObserver * _Nonnull observer, BOOL * _Nonnull stop) {
+    NSMutableArray *collector = [[NSMutableArray alloc] initWithCapacity:observersForKeyPath.count];
+    [observersForKeyPath enumerateObjectsUsingBlock:^(_YJKeyValueObserver * _Nonnull observer, NSUInteger idx, BOOL * _Nonnull stop) {
         if (identifier && [observer.associatedIdentifier isEqualToString:identifier]) {
             [_owner removeObserver:observer forKeyPath:keyPath];
             [collector addObject:observer];
         }
     }];
     
-    [observersForKeyPath minusSet:collector];
+    [observersForKeyPath removeObjectsInArray:collector];
     if (!observersForKeyPath.count) {
         [_observers removeObjectForKey:keyPath];
     }
@@ -171,8 +171,8 @@ __attribute__((visibility("hidden")))
     
     dispatch_semaphore_wait(_semaphore, DISPATCH_TIME_FOREVER);
     
-    [_observers enumerateKeysAndObjectsUsingBlock:^(id _Nonnull keyPath, NSMutableSet *  _Nonnull observersForKeyPath, BOOL * _Nonnull stop) {
-        [observersForKeyPath enumerateObjectsUsingBlock:^(id  _Nonnull observer, BOOL * _Nonnull stop) {
+    [_observers enumerateKeysAndObjectsUsingBlock:^(id _Nonnull keyPath, NSMutableArray *  _Nonnull observersForKeyPath, BOOL * _Nonnull stop) {
+        [observersForKeyPath enumerateObjectsUsingBlock:^(id  _Nonnull observer, NSUInteger idx, BOOL * _Nonnull stop) {
             [_owner removeObserver:observer forKeyPath:keyPath];
         }];
     }];

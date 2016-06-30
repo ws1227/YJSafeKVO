@@ -28,7 +28,7 @@
 #endif
 
 #ifndef SUPPORT_MSB_TAGGED_POINTERS
-    #if !SUPPORT_TAGGED_POINTERS  ||  !TARGET_OS_IPHONE
+    #if !SUPPORT_TAGGED_POINTERS  ||  !TARGET_OS_IPHONE /* --- I'm not testing for apple watch and apple TV --- */
         #define SUPPORT_MSB_TAGGED_POINTERS 0
     #else
         #define SUPPORT_MSB_TAGGED_POINTERS 1
@@ -60,11 +60,11 @@
 /* ----------------------------------- */
 
 BOOL yj_object_isClass(id obj) {
-#if __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_8_0 || MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_10
-    return object_isClass(obj);
-#else
-    return obj == [obj class];
-#endif
+    #if __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_8_0 || MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_10
+        return object_isClass(obj);
+    #else
+        return obj == [obj class];
+    #endif
 }
 
 @implementation NSObject (YJRuntimeExtension)
@@ -308,14 +308,14 @@ __attribute__((visibility("hidden")))
 
 + (instancetype)keeper;
 
-// Returns YES means add identifier successfully, NO means identifier has been added already.
+// Returns YES that means adding identifier successfully, NO means identifier has been added already.
 // Must passing a valid non-null string as identifier.
-- (BOOL)addIdentifier:(NSString *)identifier forClassName:(NSString *)className;
+- (BOOL)addIdentifier:(NSString *)identifier forClass:(Class)class;
 
 @end
 
 @implementation _YJIMPInsertionKeeper {
-    NSMutableDictionary <NSString */*className*/, NSMutableSet */*identifiers*/> *_records;
+    NSMapTable <Class, NSMutableArray *> *_records;
     dispatch_semaphore_t _semaphore;
 }
 
@@ -324,25 +324,25 @@ __attribute__((visibility("hidden")))
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         keeper = [_YJIMPInsertionKeeper new];
-        keeper->_records = [NSMutableDictionary new];
+        keeper->_records = [NSMapTable strongToStrongObjectsMapTable];
         keeper->_semaphore = dispatch_semaphore_create(1);
     });
     return keeper;
 }
 
-- (BOOL)addIdentifier:(NSString *)identifier forClassName:(NSString *)className {
+- (BOOL)addIdentifier:(NSString *)identifier forClass:(Class)class {
     dispatch_semaphore_wait(_semaphore, DISPATCH_TIME_FOREVER);
     
-    NSMutableSet *identifiers = _records[className];
+    NSMutableArray *identifiers = [_records objectForKey:class];
     if (!identifiers) {
-        identifiers = [NSMutableSet new];
-        _records[className] = identifiers;
+        identifiers = [NSMutableArray new];
+        [_records setObject:identifiers forKey:class];
     }
     if ([identifiers containsObject:identifier]) {
         dispatch_semaphore_signal(_semaphore);
         return NO;
     }
-    [identifiers addObject:[identifier copy]];
+    [identifiers addObject:identifier];
     dispatch_semaphore_signal(_semaphore);
     return YES;
 }
@@ -364,20 +364,16 @@ static BOOL _yj_insertImpBlocksIntoMethod(id obj, SEL sel, NSString *identifier,
     
     // get proper class
     BOOL isClass = yj_object_isClass(obj);
-    Class cls = isClass ? obj : [obj class]; // NOT object_getClass(obj);
+    Class cls = isClass ? obj : [obj class]; // NOT object_getClass(obj)
     
     // get default imp from class
     Method method = isClass ? class_getClassMethod(cls, sel) : class_getInstanceMethod(cls, sel);
     void (*defaultImp)(__unsafe_unretained id, SEL) = (void(*)(__unsafe_unretained id, SEL))method_getImplementation(method);
     if (!defaultImp) return NO;
     
-    // get class name
-    const char *clsName = class_getName(cls);
-    NSString *className = [NSString stringWithUTF8String:clsName];
-    
     // keep insertion in records
     NSString *internalID = [NSString stringWithFormat:@"(%@)%@", (isClass ? @"+" : @"-"), identifier];
-    if (identifier.length && ![[_YJIMPInsertionKeeper keeper] addIdentifier:internalID forClassName:className]) {
+    if (identifier.length && ![[_YJIMPInsertionKeeper keeper] addIdentifier:internalID forClass:cls]) {
         return NO;
     }
     

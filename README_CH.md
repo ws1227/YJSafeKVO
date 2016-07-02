@@ -122,6 +122,18 @@ Context: 0x0'
 
 2. 还有需要说明的就是`YJSafeKVO`所产生的所属关系链，被观察的目标对象(target)拥有隐式生成的观察者(observers)，而观察者会持有block对象，当被观察者(target)被释放时，整个链条就会从顶端开始依次释放对象；当消息接收者(receiver, 或者说订阅者subscriber)在被观察者释放前被释放的话，只有与其相关的隐式观察者会被依次释放。
 
+			          Target(keyPath)
+			                |           
+			             Manager
+			                |           
+			    |-----------|-----------|
+			    |           |           |
+			observer     observer     observer
+			    |           |           |
+			    |-----------|-----------|
+			                |           
+			            Subscriber
+
 <br>
 
 ### 兼容情况

@@ -122,6 +122,18 @@ If you are familiar with `-addObserverForName:object:queue:usingBlock:` for `NSN
 
 2. You probably want to know about the ownership for `YJSafeKVO`. The observered target object ownes the implicit observers, each observer owns its block object. When target is deallocated, the top owner of ownership chain will let go and start releasing the rest of objects. If receiver(subscriber) is released before the target, only related observers get deallocated.
 
+			          Target(keyPath)
+			                |           
+			             Manager
+			                |           
+			    |-----------|-----------|
+			    |           |           |
+			observer     observer     observer
+			    |           |           |
+			    |-----------|-----------|
+			                |           
+			            Subscriber
+			            
 <br>
 
 ### Compatibility

@@ -15,6 +15,8 @@ Pod::Spec.new do |s|
   s.social_media_url = 'http://weibo.com/u/5736413097'
 
   s.requires_arc = true
+  s.ios.deployment_target = '6.0'
+  s.osx.deployment_target = '10.8'
 
   s.source_files = 'YJSafeKVO/Classes/**/*'
   s.public_header_files = 'YJSafeKVO/Classes/**/*.h'

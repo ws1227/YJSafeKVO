@@ -72,15 +72,16 @@ e.g. If in the controller implementation, you want to observe foo's property cal
 }];
 ```
 
-or using `YJKVO` macro:
+or using `OBSV` macro:
 
 ```
-[self observe:YJKVO(self.foo, name) updates:^(Controller *self, Foo *foo, NSString *newValue) {
+[self observe:OBSV(self.foo, name) updates:^(Controller *self, Foo *foo, NSString *newValue) {
     if (newValue) self.label.text = newValue;
 }];
 ```
 
-No crash, no retain cycle (mark self as local variable for block), It just work.
+No crash, no retain cycle (mark self as local variable for block).
+It just work.
 
 <br>
 
@@ -95,6 +96,30 @@ There is no public way for adding observer. Calling APIs provided by `YJSafeKVO`
 * Convenience multiple observers generation for the same key path observation.
 * Because observer is self-managed. It's guaranteed that observer will be removed before receiver's deallocation. No crashes.
 
+**YJSafeKVO's Pattern**
+
+```
+[subscriber observeTarget:target keyPath:@"target's property" updates:^(id subscriber, id target, id _Nullable newValue) {
+    // handle value updates
+}];
+```
+
+If A observes the change of B's name, then call:
+
+```
+[A observeTarget:B keyPath:@"name" updates:^(id A, id B, id _Nullable newName) {
+    // ...
+}];
+```
+
+Reading this is much natural than "-addObserver:keyPath:...", or simply just call "-observe:".
+
+```
+[A observe:OBSV(B, name) updates:^(id A, id B, id _Nullable newName) {
+    // ...
+}];
+```
+
 <br>
 
 ### Questions
@@ -104,7 +129,7 @@ There is no public way for adding observer. Calling APIs provided by `YJSafeKVO`
 For example if your observed property is being set with new value on one thread, and you expect to update UI with new value in the callback block executed on main thread. You can use the extended API for specifing a `NSOperationQueue` parameter.
 
 ```
-[self observe:YJKVO(self.foo, name)
+[self observe:OBSV(self.foo, name)
       options:NSKeyValueObservingOptionNew
         queue:[NSOperationQueue mainQueue]
       changes:^(id receiver, id target, NSDictionary *change) {

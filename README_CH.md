@@ -72,15 +72,15 @@ Context: 0x0'
 }];
 ```
 
-或者使用`YJKVO`宏表达式：
+或者使用`OBSV`宏表达式：
 
 ```
-[self observe:YJKVO(self.foo, name) updates:^(Controller *self, Foo *foo, NSString *newValue) {
+[self observe:OBSV(self.foo, name) updates:^(Controller *self, Foo *foo, NSString *newValue) {
     if (newValue) self.label.text = newValue;
 }];
 ```
 
-没有崩溃和引用循环（把block中的变量receiver改为self），It just work.
+没有崩溃和引用循环（把block中的变量receiver改为self），仅此而已。
 
 <br>
 
@@ -95,6 +95,30 @@ Context: 0x0'
 * 允许观察相同的keyPath而生成多个观察者
 * 由于生成的观察者是自我管理的，因此能够保证观察者在被观察者释放前，首先被移除掉，从而避免崩溃
 
+**YJSafeKVO的范式**
+
+```
+[subscriber observeTarget:target keyPath:@"target's property" updates:^(id subscriber, id target, id _Nullable newValue) {
+    // 处理值的更新
+}];
+```
+
+如果A要观察B的属性name的变化，调用方法如下：
+
+```
+[A observeTarget:B keyPath:@"name" updates:^(id A, id B, id _Nullable newName) {
+    // ...
+}];
+```
+
+这样阅读起来也更加自然，或者直接写成"-observe:"
+
+```
+[A observe:OBSV(B, name) updates:^(id A, id B, id _Nullable newName) {
+    // ...
+}];
+```
+
 <br>
 
 ### 关于疑虑
@@ -104,7 +128,7 @@ Context: 0x0'
 比如你观察的属性在其他线程中被赋值，但是你期望block能在主线程中回调并且更新UI。你可以专门指定一个`NSOperationQueue`对象作为参数用于回调。
 
 ```
-[self observe:YJKVO(self.foo, name)
+[self observe:OBSV(self.foo, name)
       options:NSKeyValueObservingOptionNew
         queue:[NSOperationQueue mainQueue]
       changes:^(id receiver, id target, NSDictionary *change) {

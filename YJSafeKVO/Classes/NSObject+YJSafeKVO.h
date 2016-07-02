@@ -22,15 +22,15 @@ NS_ASSUME_NONNULL_BEGIN
     (((void)(NO && ((void)KEYPATH, NO)), strchr(#KEYPATH, '.') + 1))
 #endif
 
-#define YJKVO(TARGET, KEYPATH) \
+#define OBSV(TARGET, KEYPATH) \
     [YJKVOCombiner target:TARGET keyPath:@(((void)(NO && ((void)TARGET.KEYPATH, NO)), #KEYPATH))]
 
-/// Using YJKVO macro.
+/// Using OBSV macro.
 /// e.g. If foo wants to observe bar's name property change when a new name applys to bar, then use:
 /// @code
-/// [foo observe:YJKVO(bar, name) ...]
+/// [foo observe:OBSV(bar, name) ...]
 /// @endcode
-typedef id YJKVO;
+typedef id OBSV;
 
 
 /**
@@ -43,28 +43,28 @@ typedef id YJKVO;
 
 
 /* ------------------------------------------------------------------------------------------------------------ */
-//                                 APIs for using YJKVO(target, keyPath)
+//                                 APIs for using OBSV(target, keyPath)
 /* ------------------------------------------------------------------------------------------------------------ */
 
 /**
  @brief The receiver observe the target with key path by using Key-Value Observing mechanism with block based callback.
  
- @param targetAndKeyPath    The YJKVOCombiner object for wrapping observed target and key path, using YJKVO(target, keyPath).
+ @param targetAndKeyPath    The YJKVOCombiner object for wrapping observed target and key path, using OBSV(target, keyPath).
  @param updates             The block of code will be performed both immediately and when observed value changes.
  */
-- (void)observe:(YJKVO)targetAndKeyPath updates:(void(^)(id receiver, id target, id _Nullable newValue))updates
+- (void)observe:(OBSV)targetAndKeyPath updates:(void(^)(id receiver, id target, id _Nullable newValue))updates
             NS_SWIFT_UNAVAILABLE("Use observe(target:keyPath:updates:) instead.");
 
 
 /**
  @brief The receiver observe the target with key path by using Key-Value Observing mechanism with block based callback.
  
- @param targetAndKeyPath    The YJKVOCombiner object for wrapping observed target and key path, using YJKVO(target, keyPath).
+ @param targetAndKeyPath    The YJKVOCombiner object for wrapping observed target and key path, using OBSV(target, keyPath).
  @param options             A combination of the NSKeyValueObservingOptions values that specifies what is included in observation notifications. 
  @param queue               The operation queue to which block should be added.
  @param changes             The block of code will be performed when observed value changes.
  */
-- (void)observe:(YJKVO)targetAndKeyPath
+- (void)observe:(OBSV)targetAndKeyPath
         options:(NSKeyValueObservingOptions)options
           queue:(nullable NSOperationQueue *)queue
         changes:(void(^)(id receiver, id target, NSDictionary *change))changes
@@ -74,9 +74,9 @@ typedef id YJKVO;
 /**
  @brief Manually stop observing the key path when you finish the job.
  
- @param targetAndKeyPath    The YJKVOCombiner object for wrapping observed target and key path, using YJKVO(target, keyPath).
+ @param targetAndKeyPath    The YJKVOCombiner object for wrapping observed target and key path, using OBSV(target, keyPath).
  */
-- (void)unobserve:(YJKVO)targetAndKeyPath NS_SWIFT_UNAVAILABLE("Use unobserve(target:keyPath:) instead.");
+- (void)unobserve:(OBSV)targetAndKeyPath NS_SWIFT_UNAVAILABLE("Use unobserve(target:keyPath:) instead.");
 
 
 /* ------------------------------------------------------------------------------------------------------------ */

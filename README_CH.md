@@ -62,25 +62,25 @@ Context: 0x0'
 
 ### 解决方案
 
-虽然不管这些API是有多么的难用跟危险，`KVO`本身还是相当的重要。但是作为一名开发者，我只不过想调用一些简单的方法来完成目的而已。于是这里给出了解决方法：
+虽然不管这些API是有多么的难用跟危险，`KVO`本身还是相当的重要。但是作为一名开发者，我只不过想调用一些简单的方法来完成目的而已。于是这里有了`YJSafeKVO`：
 
-`YJSafeKVO`的目标，就是为已经适应`Cocoa`编程的开发者，提供一套使用简洁的接口，避免由于操作不当而引发不必要的崩溃。
-
-* 支持block参数
-* 会隐式生成观察者，并且自动清理，没有以上崩溃问题
-* 当不需要观察的时候，允许手动停止观察行为
-* 支持在同一个对象的同一个keyPath中添加多次观察行为
-* 支持标记一个（或多个）观察行为，以便手动停止观察的时候停止被标记的观察行为
-* 支持`NSOperationQueue`用于添加回调block
-* 提供了`@keyPath`静态检查
-
-如果我需要观察foo的属性name，在name的值改变时做出响应，那么我就调用：
+比如在controller的实现中，假如你需要观察foo的name属性的变化，在获得新值后来更新label，只需要：
 
 ```
-[foo observeKeyPath:@"name" changes:^(id  _Nonnull receiver, id  _Nullable newValue) {
-    // NSLog(@"%@ 有了新的名字: %@", receiver, newValue);
+[self observeTarget:self.foo keyPath:@"name" updates:^(Controller *self, Foo *foo, NSString *newValue) {
+    if (newValue) self.label.text = newValue;
 }];
 ```
+
+或者使用`YJKVO`宏表达式：
+
+```
+[self observe:YJKVO(self.foo, name) updates:^(Controller *self, Foo *foo, NSString *newValue) {
+    if (newValue) self.label.text = newValue;
+}];
+```
+
+没有崩溃和引用循环（把block中的变量receiver改为self），It just work.
 
 <br>
 
@@ -95,66 +95,44 @@ Context: 0x0'
 * 允许观察相同的keyPath而生成多个观察者
 * 由于生成的观察者是自我管理的，因此能够保证观察者在被观察者释放前，首先被移除掉，从而避免崩溃
 
-**难道真的没有控制观察者的途径吗？**
-
-其实有的，而且也应该有的。可以调用方法的时候通过设置`identifier`参数来为每个或者一组观察者指定一个标记，以便未来的时候可以人为去清理。这时只需要清理匹配了标记的观察者，而不是所有观察了同一个keyPath的观察者。
-
-设想一下这个情况：现在有个单例对象的同一个属性被很多其他对象所观察着，当其中一个对象结束观察以后，如果调用`[singleton unobserveKeyPath:]`的话，会导致观察这个属性的所有观察者都被释放，那么其他的对象也就无法继续进行观察了。
-
-为了避免这个问题，需要：
-
-* 调用`[singleton observeKeyPath:options:identifier:queue:changes:]`传入`identifier`来标记观察者
-* 调用`[singleton unobserveKeyPath:forIdentifier:]`就只会移除匹配了标记的观察者
-
 <br>
 
 ### 关于疑虑
-
-#### 这个`@keyPath`是神马 ?
-
-它具有静态检查`key path`的特性（不用填写字符串对象，然后等到运行时再去判断）。自从苹果宣布`Swift 3`将支持`#keyPath`的特性以后，可以得出一个结论：对于`key path`的静态检查不仅能够保证代码安全，并且也会成为趋势。在`Objective C`中使用`@keyPath`就跟使用`@selector`差不多是一个道理。
-
-推荐将代码`[foo observeKeyPath:@"name" ...]` 替换为 `[foo observeKeyPath:@keyPath(foo.name) ...]`，`@keyPath`只会裁剪掉字符串中首个点号前面的部分，所以不要把`self.foo.name`那去做静态检查，否则会生成`foo.name`作为方法的key path的参数而导致出错。具体详见`YJKVCMacros.h`。
-
-<br>
 
 #### 如果牵扯进了其他线程该怎么办 ？
 
 比如你观察的属性在其他线程中被赋值，但是你期望block能在主线程中回调并且更新UI。你可以专门指定一个`NSOperationQueue`对象作为参数用于回调。
 
 ```
-[foo observeKeyPath:@keyPath(foo.name)
-            options:NSKeyValueObservingOptionNew
-         identifier:nil
-              queue:[NSOperationQueue mainQueue]
-            changes:^(id  _Nonnull receiver, id  _Nullable newValue, NSDictionary<NSString *,id> * _Nonnull change) {
-                // 回调将在主线程中执行
-            }];
+[self observe:YJKVO(self.foo, name)
+      options:NSKeyValueObservingOptionNew
+        queue:[NSOperationQueue mainQueue]
+      changes:^(id receiver, id target, NSDictionary *change) {
+    // 回调将在主线程中执行
+}
 ```
 
 如果你对`NSNotificationCenter`的`-addObserverForName:object:queue:usingBlock:`不陌生的话，那么使用上面的方法就不成问题了。
 
 <br>
 
-#### 假如被观察者一直不被释放的话，那么所有产生的观察者就一直不被释放喽 ？
-
-理论上说是的，不过当你完成观察任务后，你可以调用`-[foo unobserve...]`来自行清理观察者。
-
-<br>
-
 #### 对于使用`YJSafeKVO`提供的接口还需要注意哪些问题呢 ?
 
-1. 在回调block中，默认会带有一个`newValue`的参数，但是不包含`oldValue`，如果需要的话，可以从回调block中的change字典里获取。
+1. 当你调用任何带有`unobserve..`前缀的方法时，它所做的只是清除由`YJSafeKVO`隐式生成的观察者，而不会好心地去帮你清理其他的观察者（比如你自己使用系统提供的方法或者其他第三方库的方法创建的观察者）。
 
-2. 当你调用任何带有`unobserve..`前缀的方法时，它所做的只是清除由`YJSafeKVO`隐式生成的观察者，而不会好心地去帮你清理其他的观察者（比如你自己使用系统提供的方法或者其他第三方库的方法创建的观察者）。
-
-3. 还有需要留意的就是`YJSafeKVO`所产生的所属关系链，被观察的消息接收者对象拥有隐式生成的观察者，而观察者会持有block对象，当接收者被销毁时，整个链条就会从顶端开始依次释放对象。特别注意的就是在使用block的时候，需要避免引用循环即可。
+2. 还有需要说明的就是`YJSafeKVO`所产生的所属关系链，被观察的目标对象(target)拥有隐式生成的观察者(observers)，而观察者会持有block对象，当被观察者(target)被释放时，整个链条就会从顶端开始依次释放对象；当消息接收者(receiver, 或者说订阅者subscriber)在被观察者释放前被释放的话，只有与其相关的隐式观察者会被依次释放。
 
 <br>
 
 ### 兼容情况
 
 由于`KVO`是源于`Cocoa`编程的范式，因此只要被观察的对象继承于`NSObject`的话，它自然会与生俱来这种特性，但是对于`Swift`来说，`struct`以及基类不属于`NSObject`的实例对象就无法使用`KVO`了。
+
+<br>
+
+## 环境要求
+
+YJSafeKVO 需要Xcode 7.3以上的支持，用于使用`NS_SWIFT_NAME`来创建swift的API
 
 <br>
 
@@ -178,7 +156,7 @@ huang-kun, jack-huang-developer@foxmail.com
 
 ## 许可
 
-YJSafeKVO is available under the MIT license. See the LICENSE file for more info.
+YJSafeKVO基于MIT许可，更多内容请查看LICENSE文件。
 
 
 

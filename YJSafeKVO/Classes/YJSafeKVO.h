@@ -12,4 +12,3 @@
 
 #import <YJSafeKVO/NSObject+YJRuntimeEncapsulation.h>
 #import <YJSafeKVO/NSObject+YJSafeKVO.h>
-#import <YJSafeKVO/YJKVCMacros.h>

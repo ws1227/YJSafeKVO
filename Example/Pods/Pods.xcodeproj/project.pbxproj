@@ -15,8 +15,6 @@
 		32490DB01D21037200ACDA51 /* NSObject+YJSafeKVO.h in Headers */ = {isa = PBXBuildFile; fileRef = 32490DA81D21037200ACDA51 /* NSObject+YJSafeKVO.h */; };
 		32490DB11D21037200ACDA51 /* NSObject+YJSafeKVO.m in Sources */ = {isa = PBXBuildFile; fileRef = 32490DA91D21037200ACDA51 /* NSObject+YJSafeKVO.m */; };
 		32490DB21D21037200ACDA51 /* NSObject+YJSafeKVO.m in Sources */ = {isa = PBXBuildFile; fileRef = 32490DA91D21037200ACDA51 /* NSObject+YJSafeKVO.m */; };
-		32490DB31D21037200ACDA51 /* YJKVCMacros.h in Headers */ = {isa = PBXBuildFile; fileRef = 32490DAA1D21037200ACDA51 /* YJKVCMacros.h */; };
-		32490DB41D21037200ACDA51 /* YJKVCMacros.h in Headers */ = {isa = PBXBuildFile; fileRef = 32490DAA1D21037200ACDA51 /* YJKVCMacros.h */; };
 		32490E211D2179F300ACDA51 /* YJSafeKVO.h in Headers */ = {isa = PBXBuildFile; fileRef = 32490E201D2179F300ACDA51 /* YJSafeKVO.h */; };
 		3EFA279608E78B38B472F1EE3F4B5D0A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CEC22C73C1608DFA5D5D78BDCB218219 /* Foundation.framework */; };
 		49392A726538B9CFD928F6202CD1A1EF /* YJSafeKVO-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = D3791AE05BFDB63414B3023599C5B542 /* YJSafeKVO-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -45,7 +43,6 @@
 		32490DA71D21037200ACDA51 /* NSObject+YJRuntimeEncapsulation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSObject+YJRuntimeEncapsulation.m"; sourceTree = "<group>"; };
 		32490DA81D21037200ACDA51 /* NSObject+YJSafeKVO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSObject+YJSafeKVO.h"; sourceTree = "<group>"; };
 		32490DA91D21037200ACDA51 /* NSObject+YJSafeKVO.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSObject+YJSafeKVO.m"; sourceTree = "<group>"; };
-		32490DAA1D21037200ACDA51 /* YJKVCMacros.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = YJKVCMacros.h; sourceTree = "<group>"; };
 		32490E201D2179F300ACDA51 /* YJSafeKVO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = YJSafeKVO.h; sourceTree = "<group>"; };
 		3CE30A5EFD3DBB2BEC87EB78499ABB6E /* YJSafeKVO.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = YJSafeKVO.xcconfig; sourceTree = "<group>"; };
 		4562E01977D604295E87A31A8A3D16EE /* Pods-YJSafeKVO_Tests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-YJSafeKVO_Tests.release.xcconfig"; sourceTree = "<group>"; };
@@ -144,7 +141,6 @@
 				32490DA71D21037200ACDA51 /* NSObject+YJRuntimeEncapsulation.m */,
 				32490DA81D21037200ACDA51 /* NSObject+YJSafeKVO.h */,
 				32490DA91D21037200ACDA51 /* NSObject+YJSafeKVO.m */,
-				32490DAA1D21037200ACDA51 /* YJKVCMacros.h */,
 			);
 			path = Classes;
 			sourceTree = "<group>";
@@ -210,7 +206,6 @@
 				FCF90E83441F5F9E45F02BAFA04D5DE8 /* Pods-YJSafeKVO_Tests-umbrella.h in Headers */,
 				32490DAF1D21037200ACDA51 /* NSObject+YJSafeKVO.h in Headers */,
 				32490DAB1D21037200ACDA51 /* NSObject+YJRuntimeEncapsulation.h in Headers */,
-				32490DB31D21037200ACDA51 /* YJKVCMacros.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -222,7 +217,6 @@
 				32490E211D2179F300ACDA51 /* YJSafeKVO.h in Headers */,
 				32490DB01D21037200ACDA51 /* NSObject+YJSafeKVO.h in Headers */,
 				32490DAC1D21037200ACDA51 /* NSObject+YJRuntimeEncapsulation.h in Headers */,
-				32490DB41D21037200ACDA51 /* YJKVCMacros.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

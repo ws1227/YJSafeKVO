@@ -65,7 +65,7 @@ Context: 0x0'
 虽然不管这些API是有多么的难用跟危险，`KVO`本身还是相当的重要。但是作为一名开发者，我只不过想调用一些简单的方法来完成目的而已。于是这里有了`YJSafeKVO`：
 
 ```
-[subscriber observeTarget:target keyPath:@"target's property" updates:^(id subscriber, id target, id _Nullable newValue) {
+[observer observeTarget:target keyPath:@"target's property" updates:^(id observer, id target, id _Nullable newValue) {
     // 处理值的更新
 }];
 ```

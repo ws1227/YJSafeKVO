@@ -60,42 +60,9 @@ Context: 0x0'
 
 <br>
 
-### 解决方案
+### YJSafeKVO的范式
 
 虽然不管这些API是有多么的难用跟危险，`KVO`本身还是相当的重要。但是作为一名开发者，我只不过想调用一些简单的方法来完成目的而已。于是这里有了`YJSafeKVO`：
-
-比如在controller的实现中，假如你需要观察foo的name属性的变化，在获得新值后来更新label，只需要：
-
-```
-[self observeTarget:self.foo keyPath:@"name" updates:^(Controller *self, Foo *foo, NSString *newValue) {
-    if (newValue) self.label.text = newValue;
-}];
-```
-
-或者使用`OBSV`宏表达式：
-
-```
-[self observe:OBSV(self.foo, name) updates:^(Controller *self, Foo *foo, NSString *newValue) {
-    if (newValue) self.label.text = newValue;
-}];
-```
-
-没有崩溃和引用循环（把block中的变量receiver改为self），仅此而已。
-
-<br>
-
-### 设计理念
-
-`YJSafeKVO`不允许自行添加观察者。调用`YJSafeKVO`提供的API，会隐式生成观察者，并很好的在内部被组织和管理。
-
-**为什么要把观察者给隐藏起来？**
-
-* 为了保持API的使用简洁，减少困惑
-* 降低了由于管理观察者而造成问题的可能性
-* 允许观察相同的keyPath而生成多个观察者
-* 由于生成的观察者是自我管理的，因此能够保证观察者在被观察者释放前，首先被移除掉，从而避免崩溃
-
-**YJSafeKVO的范式**
 
 ```
 [subscriber observeTarget:target keyPath:@"target's property" updates:^(id subscriber, id target, id _Nullable newValue) {
@@ -107,19 +74,76 @@ Context: 0x0'
 
 ```
 [A observeTarget:B keyPath:@"name" updates:^(id A, id B, id _Nullable newName) {
-    // ...
+    // 根据newName来更新A
 }];
 ```
 
-这样阅读起来也更加自然，或者直接写成"-observe:"
+这样阅读起来也更加自然，或者使用`OBSV`宏以后直接写成"-observe:"
 
 ```
 [A observe:OBSV(B, name) updates:^(id A, id B, id _Nullable newName) {
-    // ...
+    // 根据newName来更新A
 }];
 ```
 
 <br>
+
+### 设计理念
+
+#### 结构图
+
+这张图大致描绘了`YJSafeKVO`的关系结构
+
+```
+                               Target
+                                  |
+                               Manager
+                                  |
+              |--------------------------------------|
+           keyPath1                              keyPath2 ...
+  |-----------|-----------|                    |-----|-----
+porter      porter      porter  ...          porter      ...
+  |           |           |                    |
+(block)     (block)     (block)              (block)
+  |-----|-----|           |                    |
+    Observer1         Observer2  ...       Observer1
+
+```
+
+<br>
+
+#### 角色
+
+**被观察对象(Target)**
+
+由于被观察对象是观测值变化的源头，并且它承担着及时通知观察者有关值改变的义务，因此被观察的对象处于KVO链条顶端。
+
+**搬运工(Porter)**
+
+搬运工在注册观察行为的时候被创建出来，它们的工作就是将新的变化值传递给真正想要处理这些变化的对象。它们会把变化包装在一个block中。
+
+**管理者(Manager)**
+
+每个被观察的对象都有一个管理者，来管理这些由于注册观察行为而衍生的搬运工。管理者会把搬运工按照不同的keyPath划分为独立的小组。
+
+由于管理搬运工的机制属于内在行为，那么当被观察者即将被释放的时候，这些搬运工会自动被移除，从而避免了大多数由人为地添加和移除操作不当而造成KVO的崩溃。
+
+**观察者(Observer)**
+
+调用`-observeTarget:` or `-observe:`的对象（或消息接收者）在这里应该被看成是观察者。因为它们才是真正需要观察并及时响应变化的对象。
+
+<br>
+
+#### 因果
+
+当被观察者释放的时候，与之相关的管理者以及所有搬运工都将被释放，也就意味着整个关系图的结束。
+
+如果观察者在被观察者释放之前即将销毁的话，那么与之相关的搬运工也会跟着被释放。
+
+因此关于内部对象释放的工作都是自动完成的，条件就是被观察者或者观察者即将释放的时刻。但是如果二者都不会释放，这时候想要停止观察行为的话，可以人为调用`-[observer unobserve..]`方法来停止观察相应的keyPath。
+
+<br>
+
 
 ### 关于疑虑
 
@@ -146,17 +170,21 @@ Context: 0x0'
 
 2. 还有需要说明的就是`YJSafeKVO`所产生的所属关系链，被观察的目标对象(target)拥有隐式生成的观察者(observers)，而观察者会持有block对象，当被观察者(target)被释放时，整个链条就会从顶端开始依次释放对象；当消息接收者(receiver, 或者说订阅者subscriber)在被观察者释放前被释放的话，只有与其相关的隐式观察者会被依次释放。
 
-			          Target(keyPath)
-			                |           
-			             Manager
-			                |           
-			    |-----------|-----------|
-			    |           |           |
-			observer     observer     observer
-			    |           |           |
-			    |-----------|-----------|
-			                |           
-			            Subscriber
+```
+                               Target
+                                  |
+                               Manager
+                                  |
+              |--------------------------------------|
+           keyPath1                              keyPath2 ...
+  |-----------|-----------|                    |-----|-----
+porter      porter      porter  ...          porter      ...
+  |           |           |                    |
+(block)     (block)     (block)              (block)
+  |-----|-----|           |                    |
+    Observer1         Observer2  ...       Observer1
+
+```
 
 <br>
 

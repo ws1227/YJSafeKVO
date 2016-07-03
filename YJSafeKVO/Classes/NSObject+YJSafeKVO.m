@@ -49,34 +49,34 @@ typedef void(^YJKVOHandler)(id receiver, id target, id newValue, NSDictionary *c
 
 
 #pragma mark - internal classes
-#pragma mark * _YJKeyValueObserver
+#pragma mark * _YJKVOPorter
 
 /* ------------------------- */
-//    _YJKeyValueObserver
+//        _YJKVOPorter
 /* ------------------------- */
 
 __attribute__((visibility("hidden")))
-@interface _YJKeyValueObserver : NSObject
+@interface _YJKVOPorter : NSObject
 
 // the designated initializer
-- (instancetype)initWithSubscriber:(__kindof NSObject *)subscriber
-                             queue:(nullable NSOperationQueue *)queue
-                           handler:(YJKVOHandler)handler;
+- (instancetype)initWithObserver:(__kindof NSObject *)observer
+                           queue:(nullable NSOperationQueue *)queue
+                         handler:(YJKVOHandler)handler;
 @end
 
 
-@implementation _YJKeyValueObserver {
-    __weak id _subscriber; // the object for handling the value changes
+@implementation _YJKVOPorter {
+    __weak id _observer; // the object for handling the value changes
     YJKVOHandler _handler; // block for receiving value changes
     NSOperationQueue *_queue; // the operation queue to add the block
 }
 
-- (instancetype)initWithSubscriber:(__kindof NSObject *)subscriber
-                             queue:(nullable NSOperationQueue *)queue
-                           handler:(YJKVOHandler)handler {
+- (instancetype)initWithObserver:(__kindof NSObject *)observer
+                           queue:(nullable NSOperationQueue *)queue
+                         handler:(YJKVOHandler)handler {
     self = [super init];
     if (self) {
-        _subscriber = subscriber;
+        _observer = observer;
         _queue = queue;
         _handler = [handler copy];
     }
@@ -85,13 +85,13 @@ __attribute__((visibility("hidden")))
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSString *,id> *)change context:(void *)context {
     
-    id subscriber = self->_subscriber;
+    id observer = self->_observer;
     YJKVOHandler handler = self->_handler;
     
     void(^kvoCallbackBlock)(void) = ^{
         id newValue = change[NSKeyValueChangeNewKey];
         if (newValue == [NSNull null]) newValue = nil;
-        if (handler) handler(subscriber, object, newValue, change);
+        if (handler) handler(observer, object, newValue, change);
     };
     
     if (self->_queue) {
@@ -102,8 +102,8 @@ __attribute__((visibility("hidden")))
 }
 
 - (void)dealloc {
-    [_subscriber setYj_KVOTarget:nil];
-    _subscriber = nil;
+    [_observer setYj_KVOTarget:nil];
+    _observer = nil;
 #if DEBUG_YJ_SAFE_KVO
     NSLog(@"%@ deallocated.", self);
 #endif
@@ -112,40 +112,40 @@ __attribute__((visibility("hidden")))
 @end
 
 
-#pragma mark * _YJKeyValueObserverManager
+#pragma mark * _YJKVOManager
 
 /* ------------------------------ */
-//   _YJKeyValueObserverManager
+//          _YJKVOManager
 /* ------------------------------ */
 
 __attribute__((visibility("hidden")))
-@interface _YJKeyValueObserverManager : NSObject
+@interface _YJKVOManager : NSObject
 
 // initialize a manager instance by knowing it's caller.
 - (instancetype)initWithObservedTarget:(id)owner;
 
-// add observer to the internal collection.
-- (void)registerObserver:(_YJKeyValueObserver *)observer forKeyPath:(NSString *)keyPath options:(NSKeyValueObservingOptions)options;
+// add porter to the internal collection, and also register KVO internally.
+- (void)employPorter:(_YJKVOPorter *)porter forKeyPath:(NSString *)keyPath options:(NSKeyValueObservingOptions)options;
 
-// remove observers from internal collection for specific key path.
-- (void)unregisterObserversForKeyPath:(NSString *)keyPath;
+// remove porters from internal collection for specific key path.
+- (void)unemployPortersForKeyPath:(NSString *)keyPath;
 
-// remove observers from internal collection only for both matched key path and identifier.
-- (void)unregisterObserversForKeyPath:(NSString *)keyPath withIdentifier:(NSString *)identifier;
+// remove porters from internal collection only for both matched key path and identifier.
+- (void)unemployPortersForKeyPath:(NSString *)keyPath withIdentifier:(NSString *)identifier;
 
-// remove observers from internal collection only for both matched identifier.
-- (void)unregisterObserversWithRelatedIdentifier:(NSString *)identifier;
+// remove porters from internal collection only for both matched identifier.
+- (void)unemployPortersWithRelatedIdentifier:(NSString *)identifier;
 
-// remove all observers from internal collection.
-- (void)unregisterAllObservers;
+// remove all porters from internal collection.
+- (void)unemployAllPorters;
 
 @end
 
 
-@implementation _YJKeyValueObserverManager {
+@implementation _YJKVOManager {
     __unsafe_unretained id _target;
     dispatch_semaphore_t _semaphore;
-    NSMutableDictionary <NSString *, NSMutableArray <_YJKeyValueObserver *> *> *_observers;
+    NSMutableDictionary <NSString *, NSMutableArray <_YJKVOPorter *> *> *_porters;
 }
 
 - (instancetype)initWithObservedTarget:(id)target {
@@ -153,79 +153,79 @@ __attribute__((visibility("hidden")))
     if (self) {
         _target = target;
         _semaphore = dispatch_semaphore_create(1);
-        _observers = [NSMutableDictionary new];
+        _porters = [NSMutableDictionary new];
     }
     return self;
 }
 
-- (void)registerObserver:(_YJKeyValueObserver *)observer forKeyPath:(NSString *)keyPath options:(NSKeyValueObservingOptions)options {
+- (void)employPorter:(_YJKVOPorter *)porter forKeyPath:(NSString *)keyPath options:(NSKeyValueObservingOptions)options {
     dispatch_semaphore_wait(_semaphore, DISPATCH_TIME_FOREVER);
     
-    NSMutableArray *observersForKeyPath = _observers[keyPath];
-    if (!observersForKeyPath) {
-        observersForKeyPath = [NSMutableArray new];
-        _observers[keyPath] = observersForKeyPath;
+    NSMutableArray *portersForKeyPath = _porters[keyPath];
+    if (!portersForKeyPath) {
+        portersForKeyPath = [NSMutableArray new];
+        _porters[keyPath] = portersForKeyPath;
     }
-    [observersForKeyPath addObject:observer];
-    [_target addObserver:observer forKeyPath:keyPath options:options context:NULL];
+    [portersForKeyPath addObject:porter];
+    [_target addObserver:porter forKeyPath:keyPath options:options context:NULL];
     
     dispatch_semaphore_signal(_semaphore);
 }
 
-- (void)unregisterObserversForKeyPath:(NSString *)keyPath {
-    NSMutableArray <_YJKeyValueObserver *> *observersForKeyPath = _observers[keyPath];
-    if (!observersForKeyPath.count) return;
+- (void)unemployPortersForKeyPath:(NSString *)keyPath {
+    NSMutableArray <_YJKVOPorter *> *portersForKeyPath = _porters[keyPath];
+    if (!portersForKeyPath.count) return;
     
     dispatch_semaphore_wait(_semaphore, DISPATCH_TIME_FOREVER);
     
-    [observersForKeyPath enumerateObjectsUsingBlock:^(_YJKeyValueObserver * _Nonnull observer, NSUInteger idx, BOOL * _Nonnull stop) {
-        [_target removeObserver:observer forKeyPath:keyPath];
+    [portersForKeyPath enumerateObjectsUsingBlock:^(_YJKVOPorter * _Nonnull porter, NSUInteger idx, BOOL * _Nonnull stop) {
+        [_target removeObserver:porter forKeyPath:keyPath];
     }];
-    [_observers removeObjectForKey:keyPath];
+    [_porters removeObjectForKey:keyPath];
     
     dispatch_semaphore_signal(_semaphore);
 }
 
-- (void)unregisterObserversForKeyPath:(NSString *)keyPath withIdentifier:(NSString *)identifier {
-    NSMutableArray <_YJKeyValueObserver *> *observersForKeyPath = _observers[keyPath];
-    if (!observersForKeyPath.count) return;
+- (void)unemployPortersForKeyPath:(NSString *)keyPath withIdentifier:(NSString *)identifier {
+    NSMutableArray <_YJKVOPorter *> *portersForKeyPath = _porters[keyPath];
+    if (!portersForKeyPath.count) return;
     
     dispatch_semaphore_wait(_semaphore, DISPATCH_TIME_FOREVER);
     
-    NSMutableArray *collector = [[NSMutableArray alloc] initWithCapacity:observersForKeyPath.count];
-    [observersForKeyPath enumerateObjectsUsingBlock:^(_YJKeyValueObserver * _Nonnull observer, NSUInteger idx, BOOL * _Nonnull stop) {
-        if (identifier && [observer.associatedIdentifier isEqualToString:identifier]) {
-            [_target removeObserver:observer forKeyPath:keyPath];
-            [collector addObject:observer];
+    NSMutableArray *collector = [[NSMutableArray alloc] initWithCapacity:portersForKeyPath.count];
+    [portersForKeyPath enumerateObjectsUsingBlock:^(_YJKVOPorter * _Nonnull porter, NSUInteger idx, BOOL * _Nonnull stop) {
+        if (identifier && [porter.associatedIdentifier isEqualToString:identifier]) {
+            [_target removeObserver:porter forKeyPath:keyPath];
+            [collector addObject:porter];
         }
     }];
     
-    [observersForKeyPath removeObjectsInArray:collector];
-    if (!observersForKeyPath.count) {
-        [_observers removeObjectForKey:keyPath];
+    [portersForKeyPath removeObjectsInArray:collector];
+    if (!portersForKeyPath.count) {
+        [_porters removeObjectForKey:keyPath];
     }
     
     dispatch_semaphore_signal(_semaphore);
 }
 
-- (void)unregisterObserversWithRelatedIdentifier:(NSString *)identifier {
-    NSArray *keys = [_observers allKeys];
+- (void)unemployPortersWithRelatedIdentifier:(NSString *)identifier {
+    NSArray *keys = [_porters allKeys];
     for (NSString *key in keys) {
-        [self unregisterObserversForKeyPath:key withIdentifier:identifier];
+        [self unemployPortersForKeyPath:key withIdentifier:identifier];
     }
 }
 
-- (void)unregisterAllObservers {
-    if (!_observers.count) return;
+- (void)unemployAllPorters {
+    if (!_porters.count) return;
     
     dispatch_semaphore_wait(_semaphore, DISPATCH_TIME_FOREVER);
     
-    [_observers enumerateKeysAndObjectsUsingBlock:^(id _Nonnull keyPath, NSMutableArray *  _Nonnull observersForKeyPath, BOOL * _Nonnull stop) {
-        [observersForKeyPath enumerateObjectsUsingBlock:^(_YJKeyValueObserver * _Nonnull observer, NSUInteger idx, BOOL * _Nonnull stop) {
-            [_target removeObserver:observer forKeyPath:keyPath];
+    [_porters enumerateKeysAndObjectsUsingBlock:^(id _Nonnull keyPath, NSMutableArray *  _Nonnull portersForKeyPath, BOOL * _Nonnull stop) {
+        [portersForKeyPath enumerateObjectsUsingBlock:^(_YJKVOPorter * _Nonnull porter, NSUInteger idx, BOOL * _Nonnull stop) {
+            [_target removeObserver:porter forKeyPath:keyPath];
         }];
     }];
-    [_observers removeAllObjects];
+    [_porters removeAllObjects];
     
     dispatch_semaphore_signal(_semaphore);
 }
@@ -249,33 +249,33 @@ __attribute__((visibility("hidden")))
 
 @interface NSObject ()
 
-// Associated with a manager for managing observers
-@property (nonatomic, strong) _YJKeyValueObserverManager *yj_KVOManager;
+// Associated with a manager for managing porters
+@property (nonatomic, strong) _YJKVOManager *yj_KVOManager;
 
 @end
 
 
 @implementation NSObject (YJKVOTarget)
 
-- (void)setYj_KVOManager:(_YJKeyValueObserverManager *)yj_KVOManager {
+- (void)setYj_KVOManager:(_YJKVOManager *)yj_KVOManager {
     objc_setAssociatedObject(self, @selector(yj_KVOManager), yj_KVOManager, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
-- (_YJKeyValueObserverManager *)yj_KVOManager {
+- (_YJKVOManager *)yj_KVOManager {
     return objc_getAssociatedObject(self, _cmd);
 }
 
-- (void)_makeKVOManagerUnobservingAllKeyPaths {
-    [self.yj_KVOManager unregisterAllObservers];
+- (void)_makeKVOManagerDismissAllPorters {
+    [self.yj_KVOManager unemployAllPorters];
 }
 
 @end
 
 
-#pragma mark * YJKVOSubscriber
+#pragma mark * YJKVOObserver
 
 /* ------------------------- */
-//       YJKVOSubscriber
+//       YJKVOObserver
 /* ------------------------- */
 
 @interface NSObject ()
@@ -283,13 +283,13 @@ __attribute__((visibility("hidden")))
 // The target object for observing it's key path
 @property (nonatomic, assign) __kindof NSObject *yj_KVOTarget;
 
-// The default identifier for observing
+// The identifier for KVO registering, which will connect observer with related porters
 @property (nonatomic, copy) NSString *yj_KVOIdentifier;
 
 @end
 
 
-@implementation NSObject (YJKVOSubscriber)
+@implementation NSObject (YJKVOObserver)
 
 - (void)setYj_KVOTarget:(__kindof NSObject *)yj_KVOTarget {
     objc_setAssociatedObject(self, @selector(yj_KVOTarget), yj_KVOTarget, OBJC_ASSOCIATION_ASSIGN);
@@ -307,8 +307,8 @@ __attribute__((visibility("hidden")))
     return objc_getAssociatedObject(self, _cmd);
 }
 
-- (void)_makeTargetUnobservingRelatedKeyPaths {
-    [self.yj_KVOTarget.yj_KVOManager unregisterObserversWithRelatedIdentifier:self.yj_KVOIdentifier];
+- (void)_makeTargetDismissRelatedPorters {
+    [self.yj_KVOTarget.yj_KVOManager unemployPortersWithRelatedIdentifier:self.yj_KVOIdentifier];
 }
 
 @end
@@ -333,7 +333,7 @@ static void _yj_modifyDealloc(__unsafe_unretained id obj, SEL sel) {
     });
     __unused BOOL result = class_addMethod([obj class], deallocSel, deallocIMP, "v@:");
     
-    // Removing all observers before executing original dealloc implementation.
+    // Insert method implementation before executing original dealloc implementation.
     [obj insertBlocksIntoMethodBySelector:deallocSel
                                identifier:@"YJSafeKVO"
                                    before:^(id  _Nonnull receiver) {
@@ -341,30 +341,30 @@ static void _yj_modifyDealloc(__unsafe_unretained id obj, SEL sel) {
                                    } after:nil];
 }
 
-static void _yj_registerKVO(__kindof NSObject *subscriber, __kindof NSObject *target, NSString *keyPath,
+static void _yj_registerKVO(__kindof NSObject *observer, __kindof NSObject *target, NSString *keyPath,
                             NSKeyValueObservingOptions options, NSOperationQueue *queue, YJKVOHandler handler) {
     
     NSString *identifier = [NSString stringWithFormat:@"%@<%p>:%@<%p>.%@",
-                            NSStringFromClass([subscriber class]), subscriber,
+                            NSStringFromClass([observer class]), observer,
                             NSStringFromClass([target class]), target, keyPath];
     
-    _YJKeyValueObserver *observer = [[_YJKeyValueObserver alloc] initWithSubscriber:subscriber queue:queue handler:handler];
-    observer.associatedIdentifier = identifier;
+    _YJKVOPorter *porter = [[_YJKVOPorter alloc] initWithObserver:observer queue:queue handler:handler];
+    porter.associatedIdentifier = identifier;
     
-    subscriber.yj_KVOIdentifier = identifier;
-    subscriber.yj_KVOTarget = target;
+    observer.yj_KVOIdentifier = identifier;
+    observer.yj_KVOTarget = target;
     
-    _YJKeyValueObserverManager *kvoManager = target.yj_KVOManager;
+    _YJKVOManager *kvoManager = target.yj_KVOManager;
     if (!kvoManager) {
-        kvoManager = [[_YJKeyValueObserverManager alloc] initWithObservedTarget:target];
+        kvoManager = [[_YJKVOManager alloc] initWithObservedTarget:target];
         target.yj_KVOManager = kvoManager;
     }
     
-    [kvoManager registerObserver:observer forKeyPath:keyPath options:options];
+    [kvoManager employPorter:porter forKeyPath:keyPath options:options];
     
     // modify dealloc
-    _yj_modifyDealloc(target, @selector(_makeKVOManagerUnobservingAllKeyPaths));
-    _yj_modifyDealloc(subscriber, @selector(_makeTargetUnobservingRelatedKeyPaths));
+    _yj_modifyDealloc(target, @selector(_makeKVOManagerDismissAllPorters));
+    _yj_modifyDealloc(observer, @selector(_makeTargetDismissRelatedPorters));
 }
 
 static BOOL _yj_KVOMacroParse(id targetAndKeyPath, id *target, NSString **keyPath) {
@@ -431,7 +431,7 @@ static BOOL _yj_KVOMacroParse(id targetAndKeyPath, id *target, NSString **keyPat
 - (void)unobserve:(OBSV)targetAndKeyPath {
     __kindof NSObject *target; NSString *keyPath;
     if (_yj_KVOMacroParse(targetAndKeyPath, &target, &keyPath)) {
-        [target.yj_KVOManager unregisterObserversForKeyPath:keyPath withIdentifier:self.yj_KVOIdentifier];
+        [target.yj_KVOManager unemployPortersForKeyPath:keyPath withIdentifier:self.yj_KVOIdentifier];
     }
 }
 
@@ -460,7 +460,7 @@ static BOOL _yj_KVOMacroParse(id targetAndKeyPath, id *target, NSString **keyPat
 }
 
 - (void)unobserveTarget:(__kindof NSObject *)target keyPath:(NSString *)keyPath {
-    [target.yj_KVOManager unregisterObserversForKeyPath:keyPath withIdentifier:self.yj_KVOIdentifier];
+    [target.yj_KVOManager unemployPortersForKeyPath:keyPath withIdentifier:self.yj_KVOIdentifier];
 }
 
 @end

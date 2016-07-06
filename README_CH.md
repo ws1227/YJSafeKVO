@@ -134,6 +134,31 @@ porter      porter      porter  ...          porter      ...
 
 <br>
 
+#### 所属关系
+
+以下为`YJSafeKVO`内部对象的所有权关系。
+
+* 强引用链: 被观察者(Target) -> 管理者(Manager) -> 搬运工(Porters)
+* 弱引用链: 搬运工(Porter) -> 观察者(Observer) -> 被观察者(Target)
+
+为了保持这个所有权关系能够正常运作，在使用block的时候一定需要避免引用循环问题。
+
+```
+[self observe:OBSV(self.foo, name) updates:^(id receiver, id target, id _Nullable newName) {
+    NSLog(@"%@", self); // 产生引用循环 (self -> foo -> porter -> block -> self)
+}];
+```
+
+解决方法：将block中的变量`receiver`替换成`self`即可。
+
+```
+[self observe:OBSV(self.foo, name) updates:^(id self, id foo, id _Nullable newName) {
+    NSLog(@"%@", self); // 由于使用的self作为局部变量，因此不会产生引用循环。
+}];
+```
+
+<br>
+
 #### 因果
 
 当被观察者释放的时候，与之相关的管理者以及所有搬运工都将被释放，也就意味着整个关系图的结束。

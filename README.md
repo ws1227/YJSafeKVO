@@ -134,6 +134,31 @@ The object which calls "-observeTarget:" or "-observe:" should be treated as the
 
 <br>
 
+#### Ownership
+
+This is the ownership inside of `YJSafeKVO`.
+
+* Strong Reference chain: Target -> Manager -> Porters
+* Weak Reference chain: Porter -> Observer -> Target
+
+To make the ownership work as expected, you need to avoid retain cycle.
+
+```
+[self observe:OBSV(self.foo, name) updates:^(id receiver, id target, id _Nullable newName) {
+    NSLog(@"%@", self); // Retain cycle (self -> foo -> porter -> block -> self)
+}];
+```
+
+To solve the issue: change `receiver` variable to `self`.
+
+```
+[self observe:OBSV(self.foo, name) updates:^(id self, id foo, id _Nullable newName) {
+    NSLog(@"%@", self); // No retain cycle because using self as an local variable.
+}];
+```
+
+<br>
+
 #### Consequence
 
 If target is deallocated, it's manager with all porters are gone, which means the entire graph is disappeared. 

@@ -2,7 +2,7 @@
 //  _YJKVOSeniorPorter.h
 //  YJKit
 //
-//  Created by Jack Huang on 16/7/5.
+//  Created by huang-kun on 16/7/5.
 //  Copyright © 2016年 huang-kun. All rights reserved.
 //
 

@@ -1,14 +1,13 @@
 //
 //  YJSafeKVO.h
-//  YJKit
+//  Pods
 //
-//  Created by huang-kun on 16/6/27.
-//  Copyright © 2016年 huang-kun. All rights reserved.
+//  Created by Jack Huang on 16/7/6.
+//
 //
 
-#if !__has_feature(objc_arc)
-#error This file must be compiled with ARC.
-#endif
+#ifndef YJSafeKVO_h
+#define YJSafeKVO_h
 
-#import <YJSafeKVO/NSObject+YJRuntimeEncapsulation.h>
-#import <YJSafeKVO/NSObject+YJSafeKVO.h>
+
+#endif /* YJSafeKVO_h */

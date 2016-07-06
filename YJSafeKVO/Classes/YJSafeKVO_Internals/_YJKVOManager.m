@@ -8,7 +8,6 @@
 
 #import "_YJKVOManager.h"
 #import "_YJKVOPorter.h"
-#import "YJRuntimeEncapsulation.h"
 
 @implementation _YJKVOManager {
     __unsafe_unretained id _target;

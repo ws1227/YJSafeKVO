@@ -25,6 +25,8 @@
 		320C41621D2D366C006361F6 /* YJOBSVTuple.h in Headers */ = {isa = PBXBuildFile; fileRef = 320C41511D2D366C006361F6 /* YJOBSVTuple.h */; };
 		320C41631D2D366C006361F6 /* YJOBSVTuple.m in Sources */ = {isa = PBXBuildFile; fileRef = 320C41521D2D366C006361F6 /* YJOBSVTuple.m */; };
 		320C41651D2D36AE006361F6 /* YJSafeKVO.h in Headers */ = {isa = PBXBuildFile; fileRef = 320C41641D2D36AE006361F6 /* YJSafeKVO.h */; };
+		320C41BE1D2D3E53006361F6 /* NSObject+YJClassObjectChecking.h in Headers */ = {isa = PBXBuildFile; fileRef = 320C41BC1D2D3E53006361F6 /* NSObject+YJClassObjectChecking.h */; };
+		320C41BF1D2D3E53006361F6 /* NSObject+YJClassObjectChecking.m in Sources */ = {isa = PBXBuildFile; fileRef = 320C41BD1D2D3E53006361F6 /* NSObject+YJClassObjectChecking.m */; };
 		3EFA279608E78B38B472F1EE3F4B5D0A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CEC22C73C1608DFA5D5D78BDCB218219 /* Foundation.framework */; };
 		49392A726538B9CFD928F6202CD1A1EF /* YJSafeKVO-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = D3791AE05BFDB63414B3023599C5B542 /* YJSafeKVO-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		76612BDACD9D12986BFB79729F0378ED /* YJSafeKVO-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B5AA407E919E35B9F38568906F44EEF /* YJSafeKVO-dummy.m */; };
@@ -66,6 +68,8 @@
 		320C41511D2D366C006361F6 /* YJOBSVTuple.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = YJOBSVTuple.h; sourceTree = "<group>"; };
 		320C41521D2D366C006361F6 /* YJOBSVTuple.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = YJOBSVTuple.m; sourceTree = "<group>"; };
 		320C41641D2D36AE006361F6 /* YJSafeKVO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = YJSafeKVO.h; sourceTree = "<group>"; };
+		320C41BC1D2D3E53006361F6 /* NSObject+YJClassObjectChecking.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSObject+YJClassObjectChecking.h"; sourceTree = "<group>"; };
+		320C41BD1D2D3E53006361F6 /* NSObject+YJClassObjectChecking.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSObject+YJClassObjectChecking.m"; sourceTree = "<group>"; };
 		3CE30A5EFD3DBB2BEC87EB78499ABB6E /* YJSafeKVO.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = YJSafeKVO.xcconfig; sourceTree = "<group>"; };
 		4562E01977D604295E87A31A8A3D16EE /* Pods-YJSafeKVO_Tests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-YJSafeKVO_Tests.release.xcconfig"; sourceTree = "<group>"; };
 		53F8BAA78188F99B12239227F2DB05FC /* Pods-YJSafeKVO_Tests-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-YJSafeKVO_Tests-dummy.m"; sourceTree = "<group>"; };
@@ -107,6 +111,8 @@
 		320C41421D2D366C006361F6 /* YJSafeKVO_Dependences */ = {
 			isa = PBXGroup;
 			children = (
+				320C41BC1D2D3E53006361F6 /* NSObject+YJClassObjectChecking.h */,
+				320C41BD1D2D3E53006361F6 /* NSObject+YJClassObjectChecking.m */,
 				320C41431D2D366C006361F6 /* NSObject+YJIMPInsertion.h */,
 				320C41441D2D366C006361F6 /* NSObject+YJIMPInsertion.m */,
 			);
@@ -264,6 +270,7 @@
 			files = (
 				320C41581D2D366C006361F6 /* _YJKVOManager.h in Headers */,
 				320C41651D2D36AE006361F6 /* YJSafeKVO.h in Headers */,
+				320C41BE1D2D3E53006361F6 /* NSObject+YJClassObjectChecking.h in Headers */,
 				320C41551D2D366C006361F6 /* NSObject+YJIMPInsertion.h in Headers */,
 				320C41601D2D366C006361F6 /* NSObject+YJKVOExtension.h in Headers */,
 				320C41571D2D366C006361F6 /* _YJKVODefines.h in Headers */,
@@ -358,6 +365,7 @@
 				320C415F1D2D366C006361F6 /* _YJKVOTracker.m in Sources */,
 				320C41541D2D366C006361F6 /* NSObject+YJSafeKVO.m in Sources */,
 				76612BDACD9D12986BFB79729F0378ED /* YJSafeKVO-dummy.m in Sources */,
+				320C41BF1D2D3E53006361F6 /* NSObject+YJClassObjectChecking.m in Sources */,
 				320C415B1D2D366C006361F6 /* _YJKVOPorter.m in Sources */,
 				320C41591D2D366C006361F6 /* _YJKVOManager.m in Sources */,
 				320C415D1D2D366C006361F6 /* _YJKVOSeniorPorter.m in Sources */,

@@ -11,7 +11,11 @@
 
 #define DEBUG_YJ_SAFE_KVO 0
 
-typedef void(^YJKVOHandler)(id receiver, id target, id newValue, NSDictionary *change);
-typedef void(^YJKVOGroupHandler)(id receiver, NSArray *targets);
+typedef void(^YJKVOChangeHandler)(id receiver, id target, id newValue, NSDictionary *change);
+typedef void(^YJKVOTargetsHandler)(id receiver, NSArray *targets);
+typedef void(^YJKVOValueHandler)(id observer, id target, id newValue);
+typedef void(^YJKVOObjectsHandler)(id observer, id target);
+
+typedef id(^YJKVOReturnValueHandler)(id observer, id target, id newValue);
 
 #endif /* _YJKVODefines_h */

@@ -1,15 +1,15 @@
 //
-//  _YJKVOManager.m
+//  _YJKVOPorterManager.m
 //  YJKit
 //
 //  Created by huang-kun on 16/7/3.
 //  Copyright © 2016年 huang-kun. All rights reserved.
 //
 
-#import "_YJKVOManager.h"
+#import "_YJKVOPorterManager.h"
 #import "_YJKVOPorter.h"
 
-@implementation _YJKVOManager {
+@implementation _YJKVOPorterManager {
     __unsafe_unretained id _target;
     dispatch_semaphore_t _semaphore;
     NSMutableDictionary <NSString *, NSMutableArray <_YJKVOPorter *> *> *_porters;
@@ -57,7 +57,7 @@
     dispatch_semaphore_signal(_semaphore);
 }
 
-BOOL (^yj_containsIdenticalObjects)(NSArray *, NSArray *) = ^BOOL(NSArray *arr1, NSArray *arr2) {
+BOOL (^yj_kvo_containsIdenticalObjects)(NSArray *, NSArray *) = ^BOOL(NSArray *arr1, NSArray *arr2) {
     if (arr1.count > arr2.count)
         return NO;
     
@@ -76,7 +76,7 @@ BOOL (^yj_containsIdenticalObjects)(NSArray *, NSArray *) = ^BOOL(NSArray *arr1,
     if (!portersForKeyPath.count)
         return;
     
-    if (!yj_containsIdenticalObjects(portersForKeyPath, porters))
+    if (!yj_kvo_containsIdenticalObjects(portersForKeyPath, porters))
         return;
     
     dispatch_semaphore_wait(_semaphore, DISPATCH_TIME_FOREVER);

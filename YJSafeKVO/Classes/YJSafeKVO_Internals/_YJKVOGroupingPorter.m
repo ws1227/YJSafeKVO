@@ -1,25 +1,25 @@
 //
-//  _YJKVOSeniorPorter.m
+//  _YJKVOGroupingPorter.m
 //  YJKit
 //
 //  Created by huang-kun on 16/7/5.
 //  Copyright © 2016年 huang-kun. All rights reserved.
 //
 
-#import "_YJKVOSeniorPorter.h"
+#import "_YJKVOGroupingPorter.h"
 
-@implementation _YJKVOSeniorPorter {
+@implementation _YJKVOGroupingPorter {
     NSHashTable *_targets;
-    YJKVOGroupHandler _groupHandler;
+    YJKVOTargetsHandler _targetsHandler;
 }
 
 - (instancetype)initWithObserver:(__kindof NSObject *)observer
                          targets:(NSArray <__kindof NSObject *> *)targets
                            queue:(nullable NSOperationQueue *)queue
-                    groupHandler:(YJKVOGroupHandler)groupHandler {
+                    targetsHandler:(YJKVOTargetsHandler)targetsHandler {
     self = [super initWithObserver:observer queue:queue handler:nil];
     if (self) {
-        _groupHandler = groupHandler ? [groupHandler copy] : nil;
+        _targetsHandler = targetsHandler ? [targetsHandler copy] : nil;
         _targets = [NSHashTable weakObjectsHashTable];
         for (id target in targets) {
             [_targets addObject:target];
@@ -30,18 +30,18 @@
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSString *,id> *)change context:(void *)context {
     
-    id observer = self->_observer;
+    id observer = self.observer;
     NSArray *targets = [self->_targets allObjects];
-    YJKVOGroupHandler groupHandler = self->_groupHandler;
+    YJKVOTargetsHandler targetsHandler = self->_targetsHandler;
     
     void(^kvoCallbackBlock)(void) = ^{
         id newValue = change[NSKeyValueChangeNewKey];
         if (newValue == [NSNull null]) newValue = nil;
-        if (groupHandler) groupHandler(observer, targets);
+        if (targetsHandler) targetsHandler(observer, targets);
     };
     
-    if (self->_queue) {
-        [self->_queue addOperationWithBlock:kvoCallbackBlock];
+    if (self.queue) {
+        [self.queue addOperationWithBlock:kvoCallbackBlock];
     } else {
         kvoCallbackBlock();
     }

@@ -14,20 +14,21 @@ NS_ASSUME_NONNULL_BEGIN
 /// The class for deliver the value changes.
 
 __attribute__((visibility("hidden")))
-@interface _YJKVOPorter : NSObject {
-    @package
-    __weak id _observer; // the object for handling the value changes
-    YJKVOHandler _handler; // block for receiving value changes
-    NSOperationQueue *_queue; // the operation queue to add the block
-}
+@interface _YJKVOPorter : NSObject
 
 /// The designated initializer
 - (instancetype)initWithObserver:(__kindof NSObject *)observer
                            queue:(nullable NSOperationQueue *)queue
-                         handler:(nullable YJKVOHandler)handler;
+                         handler:(nullable YJKVOChangeHandler)handler;
 
-/// The observer for each porter.
-@property (nonatomic, weak, readonly) __kindof NSObject *observer;
+/// The observer matched with porter.
+@property (nonatomic, readonly, weak) __kindof NSObject *observer;
+
+/// The operation queue for adding block.
+@property (nonatomic, readonly, strong) NSOperationQueue *queue;
+
+/// The default handler for handling the value changes.
+@property (nonatomic, readonly, copy) YJKVOChangeHandler handler;
 
 @end
 

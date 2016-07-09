@@ -12,7 +12,7 @@
 
 - (instancetype)initWithObserver:(__kindof NSObject *)observer
                            queue:(nullable NSOperationQueue *)queue
-                         handler:(nullable YJKVOHandler)handler {
+                         handler:(nullable YJKVOChangeHandler)handler {
     self = [super init];
     if (self) {
         _observer = observer;
@@ -26,14 +26,10 @@
     return [[NSString stringWithFormat:@"%p", self] isEqualToString:[NSString stringWithFormat:@"%p", object]];
 }
 
-- (__kindof NSObject *)observer {
-    return _observer;
-}
-
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSString *,id> *)change context:(void *)context {
     
     id observer = self->_observer;
-    YJKVOHandler handler = self->_handler;
+    YJKVOChangeHandler handler = self->_handler;
     
     void(^kvoCallbackBlock)(void) = ^{
         id newValue = change[NSKeyValueChangeNewKey];
@@ -48,10 +44,10 @@
     }
 }
 
-- (void)dealloc {
 #if DEBUG_YJ_SAFE_KVO
+- (void)dealloc {
     NSLog(@"%@ deallocated.", self);
-#endif
 }
+#endif
 
 @end

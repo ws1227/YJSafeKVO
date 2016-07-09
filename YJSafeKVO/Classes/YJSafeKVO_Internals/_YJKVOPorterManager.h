@@ -1,5 +1,5 @@
 //
-//  _YJKVOManager.h
+//  _YJKVOPorterManager.h
 //  YJKit
 //
 //  Created by huang-kun on 16/7/3.
@@ -13,9 +13,10 @@
 NS_ASSUME_NONNULL_BEGIN
 
 /// The class for managing the KVO porters.
+/// This class will be attached to target.
 
 __attribute__((visibility("hidden")))
-@interface _YJKVOManager : NSObject
+@interface _YJKVOPorterManager : NSObject
 
 /// initialize a manager instance by knowing it's caller.
 - (instancetype)initWithObservedTarget:(id)owner;

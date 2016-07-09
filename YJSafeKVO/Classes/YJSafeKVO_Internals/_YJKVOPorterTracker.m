@@ -1,18 +1,18 @@
 //
-//  _YJKVOTracker.m
+//  _YJKVOPorterTracker.m
 //  YJKit
 //
 //  Created by huang-kun on 16/7/3.
 //  Copyright © 2016年 huang-kun. All rights reserved.
 //
 
-#import "_YJKVOTracker.h"
+#import "_YJKVOPorterTracker.h"
 #import "_YJKVOPorter.h"
-#import "_YJKVOManager.h"
+#import "_YJKVOPorterManager.h"
 #import "_YJKVODefines.h"
 #import "NSObject+YJKVOExtension.h"
 
-@implementation _YJKVOTracker {
+@implementation _YJKVOPorterTracker {
     __unsafe_unretained id _observer;
     dispatch_semaphore_t _semaphore;
     NSMapTable <__kindof NSObject *, NSMapTable <NSString *, NSHashTable <_YJKVOPorter *> *> *> *_relatedPorters;
@@ -48,7 +48,7 @@
     dispatch_semaphore_signal(_semaphore);
 }
 
-static void _yj_enumerateKeysAndObjectsOfMapTable(NSMapTable *mapTable, void(^handler)(id /*key*/, id /*obj*/, BOOL */*stop*/)) {
+static void _yj_kvo_enumerateKeysAndObjectsOfMapTable(NSMapTable *mapTable, void(^handler)(id /*key*/, id /*obj*/, BOOL */*stop*/)) {
     id key = nil; BOOL stop = NO;
     NSEnumerator *keyEnumerator = [mapTable keyEnumerator];
     while (key = [keyEnumerator nextObject]) {
@@ -59,9 +59,9 @@ static void _yj_enumerateKeysAndObjectsOfMapTable(NSMapTable *mapTable, void(^ha
 }
 
 - (void)untrackRelatedPortersForKeyPath:(NSString *)keyPath target:(__kindof NSObject *)target {
-    _yj_enumerateKeysAndObjectsOfMapTable(self->_relatedPorters, ^(__kindof NSObject *relatedTarget, NSMapTable *keyPathsAndPorters, BOOL *stop){
+    _yj_kvo_enumerateKeysAndObjectsOfMapTable(self->_relatedPorters, ^(__kindof NSObject *relatedTarget, NSMapTable *keyPathsAndPorters, BOOL *stop){
         if (relatedTarget == target) {
-            [target.yj_KVOManager unemployPortersForKeyPath:keyPath];
+            [target.yj_KVOPorterManager unemployPortersForKeyPath:keyPath];
             *stop = YES;
         }
     });
@@ -69,9 +69,9 @@ static void _yj_enumerateKeysAndObjectsOfMapTable(NSMapTable *mapTable, void(^ha
 
 - (void)untrackAllRelatedPorters {
     NSMapTable *relatedPorters = self->_relatedPorters;
-    _yj_enumerateKeysAndObjectsOfMapTable(relatedPorters, ^(__kindof NSObject *target, NSMapTable *keyPathsAndPorters, BOOL *stop){
-        _yj_enumerateKeysAndObjectsOfMapTable(keyPathsAndPorters, ^(NSString *keyPath, NSHashTable *porters, BOOL *stop){
-            [target.yj_KVOManager unemployPorters:[porters allObjects] forKeyPath:keyPath];
+    _yj_kvo_enumerateKeysAndObjectsOfMapTable(relatedPorters, ^(__kindof NSObject *target, NSMapTable *keyPathsAndPorters, BOOL *stop){
+        _yj_kvo_enumerateKeysAndObjectsOfMapTable(keyPathsAndPorters, ^(NSString *keyPath, NSHashTable *porters, BOOL *stop){
+            [target.yj_KVOPorterManager unemployPorters:[porters allObjects] forKeyPath:keyPath];
         });
     });
 }

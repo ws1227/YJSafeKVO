@@ -1,5 +1,5 @@
 //
-//  _YJKVOTracker.h
+//  _YJKVOPorterTracker.h
 //  YJKit
 //
 //  Created by huang-kun on 16/7/3.
@@ -13,9 +13,10 @@
 NS_ASSUME_NONNULL_BEGIN
 
 /// The class for tracking porters for observer
+/// This class will be attached to observer.
 
 __attribute__((visibility("hidden")))
-@interface _YJKVOTracker : NSObject
+@interface _YJKVOPorterTracker : NSObject
 
 /// Designated Initializer
 - (instancetype)initWithObserver:(__kindof NSObject *)observer;

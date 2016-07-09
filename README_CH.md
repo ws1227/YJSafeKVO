@@ -78,7 +78,7 @@ Context: 0x0'
 }];
 ```
 
-这样阅读起来也更加自然，或者使用`OBSV`宏以后直接写成"-observe:"
+这样阅读起来也更加自然，或者使用`PACK`宏以后直接写成"-observe:"
 
 ```
 [A observe:PACK(B, name) updates:^(id A, id B, id _Nullable newName) {
@@ -205,8 +205,6 @@ porter      porter      porter  ...          porter      ...
 [PACK(foo, name) pipe:PACK(bar, name)];
 ```
 
-The foo's name will set value from bar's name immediately, and for every changes from bar's name.
-
 调用`pipe:`方法后，foo的name会设置bar的name的值，并且当bar的name变化的时候，持续接收新的值。
 
 以下是另一个版本：
@@ -217,7 +215,7 @@ The foo's name will set value from bar's name immediately, and for every changes
 
 调用`bind:`方法后，只有当bar的name在未来更新的时候，foo的name才会更新。
 
-什么时候适合用`bind:`呢？`bind:`可以连续进行多个额外调用，比如增加值的转换方法：
+什么时候适合用`bind:`呢？`bind:`可以连续进行多个额外调用，比如添加`convert:`将不一样类型的keyPath进行值的转换：
 
 ```
 [[PACK(foo, mood) bind:PACK(bar, money)] convert:id^(...){
@@ -225,7 +223,7 @@ The foo's name will set value from bar's name immediately, and for every changes
 }];
 ```
 
-或者在设置结束后进行额外的操作：
+或者添加`after:`在设置keyPath结束后进行额外的操作：
 
 ```
 [[PACK(foo, name) bind:PACK(bar, name)] after:^(...){

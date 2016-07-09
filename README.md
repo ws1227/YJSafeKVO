@@ -78,7 +78,7 @@ If A observes the change of B's name, then call:
 }];
 ```
 
-Reading this is much natural semantically, or you can simply just call "-observe:" by using `OBSV` macro.
+Reading this is much natural semantically, or you can simply just call "-observe:" by using `PACK` macro.
 
 ```
 [A observe:PACK(B, name) updates:^(id A, id B, id _Nullable newName) {
@@ -214,7 +214,7 @@ There is another version:
 
 This time, foo's name only set value when bar changed it's name later, not immediately after calling the method.
 
-So what cases for using `bind:`? `bind:` is available for flexible nesting calls, such as value convertion:
+So what cases for using `bind:`? `bind:` is available for flexible nesting calls, such as adding `convert:` for different types of value convertion:
 
 ```
 [[PACK(foo, mood) bind:PACK(bar, money)] convert:id^(...){
@@ -222,7 +222,7 @@ So what cases for using `bind:`? `bind:` is available for flexible nesting calls
 }];
 ```
 
-or doing extra works after value setting.
+or adding `after:` for performing additional works after value updating.
 
 ```
 [[PACK(foo, name) bind:PACK(bar, name)] after:^(...){

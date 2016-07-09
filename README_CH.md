@@ -81,7 +81,7 @@ Context: 0x0'
 这样阅读起来也更加自然，或者使用`OBSV`宏以后直接写成"-observe:"
 
 ```
-[A observe:OBSV(B, name) updates:^(id A, id B, id _Nullable newName) {
+[A observe:PACK(B, name) updates:^(id A, id B, id _Nullable newName) {
     // 根据newName来更新A
 }];
 ```
@@ -97,7 +97,7 @@ Context: 0x0'
 ```
                                Target
                                   |
-                               Manager
+                             PorterManager
                                   |
               |--------------------------------------|
            keyPath1                              keyPath2 ...
@@ -122,7 +122,7 @@ porter      porter      porter  ...          porter      ...
 
 搬运工在注册观察行为的时候被创建出来，它们的工作就是将新的变化值传递给真正想要处理这些变化的对象。它们会把变化包装在一个block中。
 
-**管理者(Manager)**
+**管理者(PorterManager)**
 
 每个被观察的对象都有一个管理者，来管理这些由于注册观察行为而衍生的搬运工。管理者会把搬运工按照不同的keyPath划分为独立的小组。
 
@@ -138,13 +138,13 @@ porter      porter      porter  ...          porter      ...
 
 以下为`YJSafeKVO`内部对象的所有权关系。
 
-* 强引用链: 被观察者(Target) -> 管理者(Manager) -> 搬运工(Porters)
+* 强引用链: 被观察者(Target) -> 管理者(PorterManager) -> 搬运工(Porters)
 * 弱引用链: 搬运工(Porter) -> 观察者(Observer) -> 被观察者(Target)
 
 为了保持这个所有权关系能够正常运作，在使用block的时候一定需要避免引用循环问题。
 
 ```
-[self observe:OBSV(self.foo, name) updates:^(id receiver, id target, id _Nullable newName) {
+[self observe:PACK(self.foo, name) updates:^(id receiver, id target, id _Nullable newName) {
     NSLog(@"%@", self); // 产生引用循环 (self -> foo -> porter -> block -> self)
 }];
 ```
@@ -152,7 +152,7 @@ porter      porter      porter  ...          porter      ...
 解决方法：将block中的变量`receiver`替换成`self`即可。
 
 ```
-[self observe:OBSV(self.foo, name) updates:^(id self, id foo, id _Nullable newName) {
+[self observe:PACK(self.foo, name) updates:^(id self, id foo, id _Nullable newName) {
     NSLog(@"%@", self); // 由于使用的self作为局部变量，因此不会产生引用循环。
 }];
 ```
@@ -177,7 +177,7 @@ porter      porter      porter  ...          porter      ...
 比如你观察的属性在其他线程中被赋值，但是你期望block能在主线程中回调并且更新UI。你可以专门指定一个`NSOperationQueue`对象作为参数用于回调。
 
 ```
-[self observe:OBSV(self.foo, name)
+[self observe:PACK(self.foo, name)
       options:NSKeyValueObservingOptionNew
         queue:[NSOperationQueue mainQueue]
       changes:^(id receiver, id target, NSDictionary *change) {
@@ -192,6 +192,56 @@ porter      porter      porter  ...          porter      ...
 #### 对于使用`YJSafeKVO`提供的接口还需要注意哪些问题呢 ?
 
 当你调用任何带有`unobserve..`前缀的方法时，它所做的只是清除由`YJSafeKVO`隐式生成的观察者，而不会好心地去帮你清理其他的观察者（比如你自己使用系统提供的方法或者其他第三方库的方法创建的观察者）。
+
+<br>
+
+### 新特性
+
+#### 绑定 (2.1.0)
+
+目前支持了绑定观察者与观察对象，当对象keyPath的值改变时，就直接设置到观察者的keyPath中，比如：
+
+```
+[PACK(foo, name) pipe:PACK(bar, name)];
+```
+
+The foo's name will set value from bar's name immediately, and for every changes from bar's name.
+
+调用`pipe:`方法后，foo的name会设置bar的name的值，并且当bar的name变化的时候，持续接收新的值。
+
+以下是另一个版本：
+
+```
+[PACK(foo, name) bind:PACK(bar, name)];
+```
+
+调用`bind:`方法后，只有当bar的name在未来更新的时候，foo的name才会更新。
+
+什么时候适合用`bind:`呢？`bind:`可以连续进行多个额外调用，比如增加值的转换方法：
+
+```
+[[PACK(foo, mood) bind:PACK(bar, money)] convert:id^(...){
+    return money > 100 ? @(Happy) : @(Sad);
+}];
+```
+
+或者在设置结束后进行额外的操作：
+
+```
+[[PACK(foo, name) bind:PACK(bar, name)] after:^(...){
+    NSLog(@"foo just change a new name.");
+}];
+```
+
+又或者将以上的情况结合起来：
+
+```
+[[[PACK(foo, mood) bind:PACK(bar, money)] convert:id^(...){
+    return money > 100 ? @(Happy) : @(Sad);
+}] after:^(...){
+    NSLog(@"foo changed its mood!");
+}];
+```
 
 <br>
 

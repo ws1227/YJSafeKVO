@@ -33,7 +33,7 @@ YJKVOChangeHandler (^yj_convertedKVOChangeHandler)(YJKVOValueHandler) = ^YJKVOCh
     }
 }
 
-- (void)observes:(NSArray <PACK> *)targetsAndKeyPaths updates:(void(^)(id receiver, NSArray *targets))updates {
+- (void)observeGroup:(NSArray <PACK> *)targetsAndKeyPaths updates:(void(^)(id receiver, NSArray *targets))updates {
     
     NSMutableArray *targets = [NSMutableArray arrayWithCapacity:targetsAndKeyPaths.count];
     for (PACK targetAndKeyPath in targetsAndKeyPaths) {
@@ -44,11 +44,10 @@ YJKVOChangeHandler (^yj_convertedKVOChangeHandler)(YJKVOValueHandler) = ^YJKVOCh
     
     for (PACK targetAndKeyPath in targetsAndKeyPaths) {
         if (targetAndKeyPath.isValid) {
-            _YJKVOGroupingPorter *porter = [[_YJKVOGroupingPorter alloc] initWithObserver:self
-                                                                                  targets:[targets copy]
-                                                                                    queue:nil
-                                                                           targetsHandler:updates];
             
+            _YJKVOGroupingPorter *porter = [_YJKVOGroupingPorter porterForObserver:self
+                                                                           targets:[targets copy]
+                                                                           handler:updates];
             [[_YJKVOExecutiveOfficer officer] registerPorter:porter
                                                  forObserver:self
                                                       target:targetAndKeyPath.object

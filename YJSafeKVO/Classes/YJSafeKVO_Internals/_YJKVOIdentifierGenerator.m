@@ -19,14 +19,19 @@
     return sharedGenerator;
 }
 
-- (NSString *)bindingIdentifierForObserver:(__kindof NSObject *)observer
-                           observerKeyPath:(NSString *)observerKeyPath
-                                    target:(__kindof NSObject *)target
-                             targetKeyPath:(NSString *)targetKeyPath {
+- (NSString *)pipeIdentifierForObserver:(__kindof NSObject *)observer
+                        observerKeyPath:(NSString *)observerKeyPath
+                                 target:(__kindof NSObject *)target
+                          targetKeyPath:(NSString *)targetKeyPath {
     
-    return [NSString stringWithFormat:@"%@<%p>.%@|%@<%p>.%@",
-            NSStringFromClass([observer class]), observer, observerKeyPath,
-            NSStringFromClass([target class]), target, targetKeyPath];
+    return [NSString stringWithFormat:@"%@|%@",
+            [self keyValueCodingIdentifierForObject:target keyPath:targetKeyPath],
+            [self keyValueCodingIdentifierForObject:observer keyPath:observerKeyPath]];
+}
+
+- (NSString *)keyValueCodingIdentifierForObject:(__kindof NSObject *)object
+                                        keyPath:(NSString *)keyPath {
+    return [NSString stringWithFormat:@"%@<%p>.%@", NSStringFromClass([object class]), object, keyPath];
 }
 
 @end

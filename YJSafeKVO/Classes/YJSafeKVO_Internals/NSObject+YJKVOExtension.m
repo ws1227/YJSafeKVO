@@ -8,9 +8,6 @@
 
 #import <objc/runtime.h>
 #import "NSObject+YJKVOExtension.h"
-#import "_YJKVOPorterManager.h"
-#import "_YJKVOPorterTracker.h"
-#import "_YJKVOBindingManager.h"
 
 @implementation NSObject (YJKVOExtension)
 
@@ -30,11 +27,19 @@
     return objc_getAssociatedObject(self, _cmd);
 }
 
-- (void)setYj_KVOBindingManager:(_YJKVOBindingManager *)yj_KVOBindingManager {
-    objc_setAssociatedObject(self, @selector(yj_KVOBindingManager), yj_KVOBindingManager, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+- (void)setYj_KVOPipeIDKeeper:(_YJKVOPipeIDKeeper *)yj_KVOPipeIDKeeper {
+    objc_setAssociatedObject(self, @selector(yj_KVOPipeIDKeeper), yj_KVOPipeIDKeeper, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
-- (_YJKVOBindingManager *)yj_KVOBindingManager {
+- (_YJKVOPipeIDKeeper *)yj_KVOPipeIDKeeper {
+    return objc_getAssociatedObject(self, _cmd);
+}
+
+- (void)setYj_KVOPackerString:(NSString *)yj_KVOPackerString {
+    objc_setAssociatedObject(self, @selector(yj_KVOPackerString), yj_KVOPackerString, OBJC_ASSOCIATION_COPY_NONATOMIC);
+}
+
+- (NSString *)yj_KVOPackerString {
     return objc_getAssociatedObject(self, _cmd);
 }
 

@@ -1,5 +1,5 @@
 //
-//  _YJKVOBindingManager.h
+//  _YJKVOPipeIDKeeper.h
 //  YJKit
 //
 //  Created by huang-kun on 16/7/8.
@@ -10,20 +10,20 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-/// Class for keeping identifiers associated with the KVO binding feature.
+/// Class for keeping identifiers associated with the KVO pipe feature.
 /// This class will be attached to observer.
 
 __attribute__((visibility("hidden")))
-@interface _YJKVOBindingManager : NSObject
+@interface _YJKVOPipeIDKeeper : NSObject
 
 /// designated initializer
 - (instancetype)initWithObserver:(id)observer;
 
-/// add binding identifier
-- (void)addBindingIdentifer:(NSString *)bindingIdentifier;
+/// add pipe identifier
+- (void)addPipeIdentifier:(NSString *)pipeIdentifier;
 
-/// returns all related binding identifiers
-- (NSArray *)bindingIdentifiers;
+/// returns all related pipe identifiers
+- (NSArray *)pipeIdentifiers;
 
 @end
 

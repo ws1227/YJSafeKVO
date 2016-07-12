@@ -13,14 +13,22 @@
 __attribute__((visibility("hidden")))
 @interface _YJKVOIdentifierGenerator : NSObject
 
+
 /// singleton object
 + (instancetype)sharedGenerator;
 
-/// e.g. "Observer<0x123>.keyPath|Target<0x456>.keyPath"
+
+/// e.g. "Target<0x123>.keyPath|Observer<0x456>.keyPath"
 ///
-- (NSString *)bindingIdentifierForObserver:(__kindof NSObject *)observer
-                           observerKeyPath:(NSString *)observerKeyPath
-                                    target:(__kindof NSObject *)target
-                             targetKeyPath:(NSString *)targetKeyPath;
+- (NSString *)pipeIdentifierForObserver:(__kindof NSObject *)observer
+                        observerKeyPath:(NSString *)observerKeyPath
+                                 target:(__kindof NSObject *)target
+                          targetKeyPath:(NSString *)targetKeyPath;
+
+
+/// e.g. "Object<0x123>.keyPath"
+///
+- (NSString *)keyValueCodingIdentifierForObject:(__kindof NSObject *)object
+                                        keyPath:(NSString *)keyPath;
 
 @end

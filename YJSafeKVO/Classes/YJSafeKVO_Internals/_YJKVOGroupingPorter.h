@@ -15,11 +15,14 @@ NS_ASSUME_NONNULL_BEGIN
 __attribute__((visibility("hidden")))
 @interface _YJKVOGroupingPorter : _YJKVOPorter
 
-/// The designated initializer
-- (instancetype)initWithObserver:(__kindof NSObject *)observer
-                         targets:(NSArray <__kindof NSObject *> *)targets
-                           queue:(nullable NSOperationQueue *)queue
-                    targetsHandler:(YJKVOTargetsHandler)targetsHandler;
++ (instancetype)porterForObserver:(__kindof NSObject *)observer
+                          targets:(NSArray <__kindof NSObject *> *)targets
+                          handler:(YJKVOTargetsHandler)targetsHandler;
+
++ (instancetype)porterForObserver:(__kindof NSObject *)observer
+                  observerKeyPath:(NSString *)observerKeyPath
+                          targets:(NSArray <__kindof NSObject *> *)targets
+                          handler:(YJKVOTargetsReturnHandler)targetsReturnHandler;
 
 @end
 

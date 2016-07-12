@@ -10,40 +10,59 @@
 
 @implementation _YJKVOGroupingPorter {
     NSHashTable *_targets;
+    NSString *_observerKeyPath;
     YJKVOTargetsHandler _targetsHandler;
+    YJKVOTargetsReturnHandler _targetsReturnHandler;
 }
 
-- (instancetype)initWithObserver:(__kindof NSObject *)observer
-                         targets:(NSArray <__kindof NSObject *> *)targets
-                           queue:(nullable NSOperationQueue *)queue
-                    targetsHandler:(YJKVOTargetsHandler)targetsHandler {
-    self = [super initWithObserver:observer queue:queue handler:nil];
-    if (self) {
-        _targetsHandler = targetsHandler ? [targetsHandler copy] : nil;
-        _targets = [NSHashTable weakObjectsHashTable];
-        for (id target in targets) {
-            [_targets addObject:target];
-        }
++ (instancetype)porterForObserver:(__kindof NSObject *)observer
+                          targets:(NSArray <__kindof NSObject *> *)targets
+                          handler:(YJKVOTargetsHandler)targetsHandler {
+    
+    _YJKVOGroupingPorter *porter = [[_YJKVOGroupingPorter alloc] initWithObserver:observer queue:nil handler:nil];
+    porter->_targetsHandler = [targetsHandler copy];
+    [porter setupTargets:targets];
+    return porter;
+}
+
++ (instancetype)porterForObserver:(__kindof NSObject *)observer
+                  observerKeyPath:(NSString *)observerKeyPath
+                          targets:(NSArray <__kindof NSObject *> *)targets
+                          handler:(YJKVOTargetsReturnHandler)targetsReturnHandler {
+    
+    _YJKVOGroupingPorter *porter = [[_YJKVOGroupingPorter alloc] initWithObserver:observer queue:nil handler:nil];
+    porter->_observerKeyPath = [observerKeyPath copy];
+    porter->_targetsReturnHandler = [targetsReturnHandler copy];
+    [porter setupTargets:targets];
+    return porter;
+}
+
+- (void)setupTargets:(NSArray <__kindof NSObject *> *)targets {
+    _targets = [NSHashTable weakObjectsHashTable];
+    for (id target in targets) {
+        [_targets addObject:target];
     }
-    return self;
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSString *,id> *)change context:(void *)context {
     
-    id observer = self.observer;
+    __kindof NSObject *observer = self.observer;
+    NSString *observerKeyPath = self->_observerKeyPath;
+    
     NSArray *targets = [self->_targets allObjects];
     YJKVOTargetsHandler targetsHandler = self->_targetsHandler;
+    YJKVOTargetsReturnHandler targetsReturnHandler = self->_targetsReturnHandler;
     
-    void(^kvoCallbackBlock)(void) = ^{
-        id newValue = change[NSKeyValueChangeNewKey];
-        if (newValue == [NSNull null]) newValue = nil;
-        if (targetsHandler) targetsHandler(observer, targets);
-    };
+    id newValue = change[NSKeyValueChangeNewKey];
+    if (newValue == [NSNull null]) newValue = nil;
     
-    if (self.queue) {
-        [self.queue addOperationWithBlock:kvoCallbackBlock];
-    } else {
-        kvoCallbackBlock();
+    if (targetsHandler) {
+        targetsHandler(observer, targets);
+    }
+    
+    if (targetsReturnHandler) {
+        id mergedValue = targetsReturnHandler(observer, targets);
+        [observer setValue:mergedValue forKeyPath:observerKeyPath];
     }
 }
 

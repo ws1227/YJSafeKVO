@@ -21,7 +21,7 @@ __attribute__((visibility("hidden")))
 - (instancetype)initWithObserver:(__kindof NSObject *)observer
                  observerKeyPath:(NSString *)observerKeyPath;
 
-@property (nonatomic, copy) YJKVOReturnValueHandler convertHandler;
+@property (nonatomic, copy) YJKVOValueReturnHandler convertHandler;
 @property (nonatomic, copy) YJKVOValueTakenHandler takenHandler;
 @property (nonatomic, copy) YJKVOObjectsHandler afterHandler;
 

@@ -15,19 +15,7 @@ If you prefer reading in English, tap [here](https://github.com/huang-kun/YJSafe
 
 在`Cocoa`和`Cocoa Touch`编程中，`KVO`的范式一直扮演着重要的角色：你需要添加观察者、观察属性值的改变、移除观察者。
 
-（假设foo和bar都是实例变量，他们的类继承自NSObject）
-
-```
-[foo addObserver:bar forKeyPath:@"name" options:NSKeyValueObservingOptionNew context:NULL];
-// 还要去其他地方实现处理观察值的变化
-[foo removeObserver:bar forKeyPath:@"name"];
-```
-
 如果实现的稍有差错，那么结果基本就是崩溃。
-
-举个例子：
-
-当你需要观察foo的某个属性时，添加了bar作为观察者，但是忘了在foo被销毁前移除bar的话，于是你就收获了一份的崩溃日志：
 
 ```
 *** Terminating app due to uncaught exception 'NSInternalInconsistencyException', reason: 'An instance 0x100102560 of class Foo was deallocated while key value observers were still registered with it. Current observation info: <NSKeyValueObservationInfo 0x100104990> (
@@ -35,20 +23,9 @@ If you prefer reading in English, tap [here](https://github.com/huang-kun/YJSafe
 )'
 ```
 
-当然还有一些情况，比如当你需要观察的对象的类是有系统创建提供的话，那么你不可能通过重载`-dealloc`的方法来释放观察者，毕竟这不是自己写的类（也可以有其他解决方案，但实现起来并不优雅）。
-
-再举个例子：
-
-如果需要添加多个观察者的话，那么还得保证删除的时候一一对应。如果删除少了，就是上面的崩溃；删除错了，就是下面的崩溃。
-
-
 ```
 *** Terminating app due to uncaught exception 'NSRangeException', reason: 'Cannot remove an observer <Bar 0x100202de0> for the key path "name" from <Foo 0x100202ac0> because it is not registered as an observer.'
 ```
-
-再举个例子：
-
-如果添加了观察者，又不用去观察，也会崩溃。
 
 ```
 *** Terminating app due to uncaught exception 'NSInternalInconsistencyException', reason: '<Bar: 0x1002000b0>: An -observeValueForKeyPath:ofObject:change:context: message was received but not handled.
@@ -84,6 +61,52 @@ Context: 0x0'
 [A observe:PACK(B, name) updates:^(id A, id B, id _Nullable newName) {
     // 根据newName来更新A
 }];
+```
+
+<br>
+
+### 新特性
+
+#### 绑定 (2.1.2)
+
+`YJSafeKVO`支持了绑定观察者与观察对象，当对象keyPath的值改变时，就直接设置到观察者的keyPath中，比如：
+
+```
+[PACK(foo, name) bound:PACK(bar, name)];
+```
+
+调用`bound:`方法后，foo的name会设置为bar的name的值，并且当bar的name变化的时候，持续接收新的值。
+
+以下是另一个版本：
+
+```
+[[PACK(foo, name) piped:PACK(bar, name)] ready];
+```
+
+什么时候适合用`piped:`呢？`piped:`可以连续进行多个额外调用，比如添加`convert:`将不一样类型的keyPath进行值的转换：
+
+```
+[[[PACK(foo, mood) piped:PACK(bar, money)] convert:id^(...){
+    return money > 100 ? @(Happy) : @(Sad);
+}] ready];
+```
+
+或者添加`after:`在设置keyPath结束后进行额外的操作：
+
+```
+[[[PACK(foo, name) piped:PACK(bar, name)] after:^(...){
+    NSLog(@"foo just change a new name.");
+}] ready];
+```
+
+又或者将以上的情况结合起来：
+
+```
+[[[[PACK(foo, mood) piped:PACK(bar, money)] convert:id^(...){
+    return money > 100 ? @(Happy) : @(Sad);
+}] after:^(...){
+    NSLog(@"foo changed its mood!");
+}] ready];
 ```
 
 <br>
@@ -192,52 +215,6 @@ porter      porter      porter  ...          porter      ...
 #### 对于使用`YJSafeKVO`提供的接口还需要注意哪些问题呢 ?
 
 当你调用任何带有`unobserve..`前缀的方法时，它所做的只是清除由`YJSafeKVO`隐式生成的观察者，而不会好心地去帮你清理其他的观察者（比如你自己使用系统提供的方法或者其他第三方库的方法创建的观察者）。
-
-<br>
-
-### 新特性
-
-#### 绑定 (2.1.2)
-
-目前支持了绑定观察者与观察对象，当对象keyPath的值改变时，就直接设置到观察者的keyPath中，比如：
-
-```
-[PACK(foo, name) bound:PACK(bar, name)];
-```
-
-调用`bound:`方法后，foo的name会设置为bar的name的值，并且当bar的name变化的时候，持续接收新的值。
-
-以下是另一个版本：
-
-```
-[[PACK(foo, name) piped:PACK(bar, name)] ready];
-```
-
-什么时候适合用`piped:`呢？`piped:`可以连续进行多个额外调用，比如添加`convert:`将不一样类型的keyPath进行值的转换：
-
-```
-[[[PACK(foo, mood) piped:PACK(bar, money)] convert:id^(...){
-    return money > 100 ? @(Happy) : @(Sad);
-}] ready];
-```
-
-或者添加`after:`在设置keyPath结束后进行额外的操作：
-
-```
-[[[PACK(foo, name) piped:PACK(bar, name)] after:^(...){
-    NSLog(@"foo just change a new name.");
-}] ready];
-```
-
-又或者将以上的情况结合起来：
-
-```
-[[[[PACK(foo, mood) piped:PACK(bar, money)] convert:id^(...){
-    return money > 100 ? @(Happy) : @(Sad);
-}] after:^(...){
-    NSLog(@"foo changed its mood!");
-}] ready];
-```
 
 <br>
 

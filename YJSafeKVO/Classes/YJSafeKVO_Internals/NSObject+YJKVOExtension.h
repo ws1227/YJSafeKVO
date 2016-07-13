@@ -22,8 +22,8 @@
 /// Associated with a pipeID keeper for keeping pipe identifier
 @property (nonatomic, strong) _YJKVOPipeIDKeeper *yj_KVOPipeIDKeeper;
 
-/// Associated with a packer string for unpack it later
-@property (nonatomic, copy) NSString *yj_KVOPackerString;
+/// Associated with a variable name string
+@property (nonatomic, copy) NSString *yj_KVOVariableName;
 
 
 @end

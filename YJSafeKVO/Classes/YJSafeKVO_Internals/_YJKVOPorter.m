@@ -23,7 +23,7 @@
 }
 
 - (BOOL)isEqual:(id)object {
-    return [[NSString stringWithFormat:@"%p", self] isEqualToString:[NSString stringWithFormat:@"%p", object]];
+    return self == object;
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSString *,id> *)change context:(void *)context {

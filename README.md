@@ -196,12 +196,12 @@ After you call `-unobserve...` prefixed methods, it only help you clean up the o
 
 ### New features
 
-#### Binding (from 2.1.0)
+#### Binding (from 2.1.2)
 
 It is availalbe for binding target to observer. When value changes, it will set changes from target's key path to observer's key path automatically. It looks like this:
 
 ```
-[PACK(foo, name) pipe:PACK(bar, name)];
+[PACK(foo, name) bound:PACK(bar, name)];
 ```
 
 The foo's name will set value from bar's name immediately, and for every changes from bar's name.
@@ -209,35 +209,33 @@ The foo's name will set value from bar's name immediately, and for every changes
 There is another version:
 
 ```
-[PACK(foo, name) bind:PACK(bar, name)];
+[[PACK(foo, name) piped:PACK(bar, name)] ready];
 ```
 
-This time, foo's name only set value when bar changed it's name later, not immediately after calling the method.
-
-So what cases for using `bind:`? `bind:` is available for flexible nesting calls, such as adding `convert:` for different types of value convertion:
+So what cases for using `piped:`? `piped:` is available for flexible nesting calls, such as adding `convert:` for different types of value convertion:
 
 ```
-[[PACK(foo, mood) bind:PACK(bar, money)] convert:id^(...){
+[[[PACK(foo, mood) piped:PACK(bar, money)] convert:id^(...){
     return money > 100 ? @(Happy) : @(Sad);
-}];
+}] ready];
 ```
 
 or adding `after:` for performing additional works after value updating.
 
 ```
-[[PACK(foo, name) bind:PACK(bar, name)] after:^(...){
+[[[PACK(foo, name) piped:PACK(bar, name)] after:^(...){
     NSLog(@"foo just change a new name.");
-}];
+}] ready];
 ```
 
 or nesting them together.
 
 ```
-[[[PACK(foo, mood) bind:PACK(bar, money)] convert:id^(...){
+[[[[PACK(foo, mood) piped:PACK(bar, money)] convert:id^(...){
     return money > 100 ? @(Happy) : @(Sad);
 }] after:^(...){
     NSLog(@"foo changed its mood!");
-}];
+}] ready];
 ```
 
 <br>

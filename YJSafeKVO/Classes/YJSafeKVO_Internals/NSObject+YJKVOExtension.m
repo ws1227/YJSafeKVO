@@ -35,11 +35,11 @@
     return objc_getAssociatedObject(self, _cmd);
 }
 
-- (void)setYj_KVOPackerString:(NSString *)yj_KVOPackerString {
-    objc_setAssociatedObject(self, @selector(yj_KVOPackerString), yj_KVOPackerString, OBJC_ASSOCIATION_COPY_NONATOMIC);
+- (void)setYj_KVOVariableName:(NSString *)yj_KVOVariableName {
+    objc_setAssociatedObject(self, @selector(yj_KVOVariableName), yj_KVOVariableName, OBJC_ASSOCIATION_COPY_NONATOMIC);
 }
 
-- (NSString *)yj_KVOPackerString {
+- (NSString *)yj_KVOVariableName {
     return objc_getAssociatedObject(self, _cmd);
 }
 

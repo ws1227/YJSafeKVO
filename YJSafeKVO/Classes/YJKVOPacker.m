@@ -24,9 +24,9 @@
 
 + (instancetype)packerWithObject:(__kindof NSObject *)object
                          keyPath:(NSString *)keyPath
-                         vString:(nullable NSString *)vString {
+                    variableName:(nullable NSString *)variableName {
     
-    object.yj_KVOPackerString = vString;
+    object.yj_KVOVariableName = variableName;
     
     YJKVOPacker *packer = [YJKVOPacker new];
     packer.object = object;
@@ -133,10 +133,10 @@
 
 @end
 
-// unpack
-id yj_kvo_unpack(NSArray *targets, NSString *kvoPackerString) {
+// Retrieve target out of array.
+id _YJKVO_retrieveTarget(NSArray *targets, NSString *variableName) {
     for (__kindof NSObject *target in targets) {
-        if ([target.yj_KVOPackerString isEqualToString:kvoPackerString]) {
+        if ([target.yj_KVOVariableName isEqualToString:variableName]) {
             return target;
         }
     }

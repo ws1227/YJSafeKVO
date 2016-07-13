@@ -197,48 +197,46 @@ porter      porter      porter  ...          porter      ...
 
 ### 新特性
 
-#### 绑定 (2.1.0)
+#### 绑定 (2.1.2)
 
 目前支持了绑定观察者与观察对象，当对象keyPath的值改变时，就直接设置到观察者的keyPath中，比如：
 
 ```
-[PACK(foo, name) pipe:PACK(bar, name)];
+[PACK(foo, name) bound:PACK(bar, name)];
 ```
 
-调用`pipe:`方法后，foo的name会设置bar的name的值，并且当bar的name变化的时候，持续接收新的值。
+调用`bound:`方法后，foo的name会设置为bar的name的值，并且当bar的name变化的时候，持续接收新的值。
 
 以下是另一个版本：
 
 ```
-[PACK(foo, name) bind:PACK(bar, name)];
+[[PACK(foo, name) piped:PACK(bar, name)] ready];
 ```
 
-调用`bind:`方法后，只有当bar的name在未来更新的时候，foo的name才会更新。
-
-什么时候适合用`bind:`呢？`bind:`可以连续进行多个额外调用，比如添加`convert:`将不一样类型的keyPath进行值的转换：
+什么时候适合用`piped:`呢？`piped:`可以连续进行多个额外调用，比如添加`convert:`将不一样类型的keyPath进行值的转换：
 
 ```
-[[PACK(foo, mood) bind:PACK(bar, money)] convert:id^(...){
+[[[PACK(foo, mood) piped:PACK(bar, money)] convert:id^(...){
     return money > 100 ? @(Happy) : @(Sad);
-}];
+}] ready];
 ```
 
 或者添加`after:`在设置keyPath结束后进行额外的操作：
 
 ```
-[[PACK(foo, name) bind:PACK(bar, name)] after:^(...){
+[[[PACK(foo, name) piped:PACK(bar, name)] after:^(...){
     NSLog(@"foo just change a new name.");
-}];
+}] ready];
 ```
 
 又或者将以上的情况结合起来：
 
 ```
-[[[PACK(foo, mood) bind:PACK(bar, money)] convert:id^(...){
+[[[[PACK(foo, mood) piped:PACK(bar, money)] convert:id^(...){
     return money > 100 ? @(Happy) : @(Sad);
 }] after:^(...){
     NSLog(@"foo changed its mood!");
-}];
+}] ready];
 ```
 
 <br>

@@ -18,8 +18,8 @@ NS_ASSUME_NONNULL_BEGIN
 #define _STRINGIFY_VARIABLE(VARIABLE) \
     @#VARIABLE
 
-// for UNPACK(CLASS, OBJECT) macro.
-id yj_kvo_unpack(NSArray *targets, NSString *kvoPackerString);
+// For UNPACK(CLASS, TARGET) macro, not for direct use.
+id _YJKVO_retrieveTarget(NSArray *targets, NSString *variableName);
 
 #ifndef keyPath
 #define keyPath(KEYPATH) \
@@ -27,10 +27,10 @@ id yj_kvo_unpack(NSArray *targets, NSString *kvoPackerString);
 #endif
 
 #define PACK(OBJECT, KEYPATH) \
-    [YJKVOPacker packerWithObject:OBJECT keyPath:_OBJECTIFY_KEYPATH(OBJECT, KEYPATH) vString:_STRINGIFY_VARIABLE(OBJECT)]
+    [YJKVOPacker packerWithObject:OBJECT keyPath:_OBJECTIFY_KEYPATH(OBJECT, KEYPATH) variableName:_STRINGIFY_VARIABLE(OBJECT)]
 
-#define UNPACK(CLASS, OBJECT) \
-    CLASS *OBJECT = yj_kvo_unpack(targets, _STRINGIFY_VARIABLE(OBJECT));
+#define UNPACK(CLASS, TARGET) \
+    CLASS *TARGET = _YJKVO_retrieveTarget(targets, _STRINGIFY_VARIABLE(TARGET));
 
 /// PACK(OBJECT, KEYPATH) is a macro to wrap object and its key path to a YJKVOPacker.
 /// e.g. PACK(foo, name) or PACK(foo, friend.name)
@@ -41,9 +41,7 @@ typedef YJKVOPacker * PACK;
 
 @interface YJKVOPacker : NSObject
 
-+ (instancetype)packerWithObject:(__kindof NSObject *)object
-                         keyPath:(NSString *)keyPath
-                         vString:(nullable NSString *)vString;
++ (instancetype)packerWithObject:(__kindof NSObject *)object keyPath:(NSString *)keyPath variableName:(nullable NSString *)variableName;
 
 @property (nonatomic, readonly, strong) __kindof NSObject *object;
 @property (nonatomic, readonly, strong) NSString *keyPath;

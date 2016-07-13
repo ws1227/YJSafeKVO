@@ -41,27 +41,23 @@ Context: 0x0'
 
 虽然不管这些API是有多么的难用跟危险，`KVO`本身还是相当的重要。但是作为一名开发者，我只不过想调用一些简单的方法来完成目的而已。于是这里有了`YJSafeKVO`：
 
-```
-[observer observeTarget:target keyPath:@"target's property" updates:^(id observer, id target, id _Nullable newValue) {
-    // 处理值的更新
-}];
-```
-
 如果A要观察B的属性name的变化，调用方法如下：
 
 ```
-[A observeTarget:B keyPath:@"name" updates:^(id A, id B, id _Nullable newName) {
-    // 根据newName来更新A
+[A observeTarget:B keyPath:@"name" updates:^(id A, id B, id _Nullable newValue) {
+    // 根据newValue来更新A
 }];
 ```
 
-这样阅读起来也更加自然，或者使用`PACK`宏以后直接写成"-observe:"
+这样阅读起来也更加自然，或者使用`PACK`宏（推荐）
 
 ```
 [A observe:PACK(B, name) updates:^(id A, id B, id _Nullable newName) {
-    // 根据newName来更新A
+    // 根据newValue来更新A
 }];
 ```
+
+无需额外的工作，没有崩溃，仅此而已。
 
 <br>
 
@@ -83,7 +79,7 @@ Context: 0x0'
 [[PACK(foo, name) piped:PACK(bar, name)] ready];
 ```
 
-什么时候适合用`piped:`呢？`piped:`可以连续进行多个额外调用，比如添加`convert:`将不一样类型的keyPath进行值的转换：
+什么时候适合用`piped:`呢？`piped:`可以连续进行多个额外调用（`taken:`, `convert:`, `after:`），比如添加`convert:`将不一样类型的keyPath进行值的转换：
 
 ```
 [[[PACK(foo, mood) piped:PACK(bar, money)] convert:id^(...){
@@ -107,6 +103,18 @@ Context: 0x0'
 }] after:^(...){
     NSLog(@"foo changed its mood!");
 }] ready];
+```
+
+如果你希望得到的最终结果需要由多个因素共同决定，那么使用`flooded:`方法，可以传递多个变化，并且返回为一个结果。
+
+```
+[PACK(clown, name) flooded:@[ PACK(foo, name),
+                              PACK(bar, name) ] 
+                  converge:^id(id  _Nonnull observer, NSArray * _Nonnull targets) {
+    UNPACK(Foo, foo)
+    UNPACK(Bar, bar)
+    return [foo.name stringByAppendingString:bar.name];
+}];
 ```
 
 <br>

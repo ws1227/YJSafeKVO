@@ -41,27 +41,23 @@ Context: 0x0'
 
 Despite the usability and safefy, KVO is still important. As a developer, you probably just want to use some simple APIs to achieve the goal. Here comes `YJSafeKVO`. 
 
-```
-[observer observeTarget:target keyPath:@"target's property" updates:^(id observer, id target, id _Nullable newValue) {
-    // handle updates
-}];
-```
-
 If A observes the change of B's name, then call:
 
 ```
-[A observeTarget:B keyPath:@"name" updates:^(id A, id B, id _Nullable newName) {
-    // Update A based on newName...
+[A observeTarget:B keyPath:@"name" updates:^(id A, id B, id _Nullable newValue) {
+    // Update A based on newValue...
 }];
 ```
 
-Reading this is much natural semantically, or you can simply just call "-observe:" by using `PACK` macro.
+Reading this is much natural semantically, or you can simply using `PACK` macro. (Recommended)
 
 ```
-[A observe:PACK(B, name) updates:^(id A, id B, id _Nullable newName) {
-    // Update A based on newName...
+[A observe:PACK(B, name) updates:^(id A, id B, id _Nullable newValue) {
+    // Update A based on newValue...
 }];
 ```
+
+That's it. No extra work. No crashes. It just works.
 
 <br>
 
@@ -83,7 +79,7 @@ There is another version:
 [[PACK(foo, name) piped:PACK(bar, name)] ready];
 ```
 
-So what cases for using `piped:`? `piped:` is available for flexible nesting calls, such as adding `convert:` for different types of value convertion:
+So what cases for using `piped:`? `piped:` is available for flexible nesting calls (e.g. `taken:`, `convert:`, `after:`). For instance, adding `convert:` for different types of value convertion:
 
 ```
 [[[PACK(foo, mood) piped:PACK(bar, money)] convert:id^(...){
@@ -107,6 +103,18 @@ or nesting them together.
 }] after:^(...){
     NSLog(@"foo changed its mood!");
 }] ready];
+```
+
+However, if your final result is determined by more than one changing factor, you can use `flooded:`, which will take changes from multiple sources and reduce them into a single value.
+
+```
+[PACK(clown, name) flooded:@[ PACK(foo, name),
+                              PACK(bar, name) ] 
+                  converge:^id(id  _Nonnull observer, NSArray * _Nonnull targets) {
+    UNPACK(Foo, foo)
+    UNPACK(Bar, bar)
+    return [foo.name stringByAppendingString:bar.name];
+}];
 ```
 
 <br>

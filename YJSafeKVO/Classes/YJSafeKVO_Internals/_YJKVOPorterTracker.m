@@ -10,7 +10,25 @@
 #import "_YJKVOPorter.h"
 #import "_YJKVOPorterManager.h"
 #import "_YJKVODefines.h"
+#import "_YJKVOGuardian.h"
 #import "NSObject+YJKVOExtension.h"
+
+static void _yj_kvo_enumerateKeysAndObjectsOfMapTable(NSMapTable *mapTable, void(^handler)(id key, id obj, BOOL *stop)) {
+    id key = nil; BOOL stop = NO;
+    NSEnumerator *keyEnumerator = [mapTable keyEnumerator];
+    while (key = [keyEnumerator nextObject]) {
+        id obj = nil;
+        if (![key isKindOfClass:[NSString class]]) {
+            IMP equalityIMP = [[_YJKVOGuardian guardian] applyIdentityComparisonForObject:key];
+            obj = [mapTable objectForKey:key];
+            [[_YJKVOGuardian guardian] applyEqualityComparisonForObject:key implementation:equalityIMP];
+        } else {
+            obj = [mapTable objectForKey:key];
+        }
+        if (handler && obj) handler(key, obj, &stop);
+        if (stop) break;
+    }
+}
 
 @implementation _YJKVOPorterTracker {
     __unsafe_unretained id _observer;
@@ -31,11 +49,21 @@
 - (void)trackPorter:(_YJKVOPorter *)porter forKeyPath:(NSString *)keyPath target:(__kindof NSObject *)target {
     dispatch_semaphore_wait(_semaphore, DISPATCH_TIME_FOREVER);
     
+    // NSMapTable (similar to NSDictionary) calls -isEqual: for key comparison when calling -objectForKey: and -setObject:forKey:
+    // This might trigger a crash for comparing keys which might be different type and have different -isEqual: implementation.
+    // So the solution is to use pointer comparison for -isEqual: temporarily.
+    IMP equalityIMP = [[_YJKVOGuardian guardian] applyIdentityComparisonForObject:target];
+    
+    // using NSMapTable
     NSMapTable *keyPathsAndPorters = [_relatedPorters objectForKey:target];
     if (!keyPathsAndPorters) {
         keyPathsAndPorters = [NSMapTable strongToStrongObjectsMapTable];
         [_relatedPorters setObject:keyPathsAndPorters forKey:target];
     }
+    
+    // if -isEqual: IMP is switched, then switch it back.
+    [[_YJKVOGuardian guardian] applyEqualityComparisonForObject:target implementation:equalityIMP];
+    
     NSHashTable *porters = [keyPathsAndPorters objectForKey:keyPath];
     if (!porters) {
         porters = [NSHashTable weakObjectsHashTable];
@@ -46,16 +74,6 @@
     }
     
     dispatch_semaphore_signal(_semaphore);
-}
-
-static void _yj_kvo_enumerateKeysAndObjectsOfMapTable(NSMapTable *mapTable, void(^handler)(id /*key*/, id /*obj*/, BOOL */*stop*/)) {
-    id key = nil; BOOL stop = NO;
-    NSEnumerator *keyEnumerator = [mapTable keyEnumerator];
-    while (key = [keyEnumerator nextObject]) {
-        id obj = [mapTable objectForKey:key];
-        if (handler && obj) handler(key, obj, &stop);
-        if (stop) break;
-    }
 }
 
 - (void)untrackRelatedPortersForKeyPath:(NSString *)keyPath target:(__kindof NSObject *)target {

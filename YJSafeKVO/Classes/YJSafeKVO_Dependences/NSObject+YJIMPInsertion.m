@@ -110,15 +110,19 @@ static BOOL _yj_insertImpBlocksIntoMethod(id obj, SEL sel,
         return;
     
     // Add dealloc method to the current class if it doesn't implement one.
-    SEL deallocSel = sel_registerName("dealloc");
+    SEL deallocSEL = sel_registerName("dealloc");
+    Method deallocMtd = class_getInstanceMethod([self class], deallocSEL);
+    const char *deallocType = method_getTypeEncoding(deallocMtd);
+    
     IMP deallocIMP = imp_implementationWithBlock(^(__unsafe_unretained id obj){
         struct objc_super superInfo = (struct objc_super){ obj, class_getSuperclass([obj class]) };
-        ((void (*)(struct objc_super *, SEL)) objc_msgSendSuper)(&superInfo, deallocSel);
+        ((void (*)(struct objc_super *, SEL)) objc_msgSendSuper)(&superInfo, deallocSEL);
     });
-    __unused BOOL result = class_addMethod([self class], deallocSel, deallocIMP, "v@:");
+    
+    __unused BOOL result = class_addMethod([self class], deallocSEL, deallocIMP, deallocType);
     
     // Insert method implementation before executing original dealloc implementation.
-    [self performBlocksByInvokingSelector:deallocSel before:block after:nil];
+    [self performBlocksByInvokingSelector:deallocSEL before:block after:nil];
 }
 
 @end

@@ -69,9 +69,7 @@ static void _yj_kvo_enumerateKeysAndObjectsOfMapTable(NSMapTable *mapTable, void
         porters = [NSHashTable weakObjectsHashTable];
         [keyPathsAndPorters setObject:porters forKey:keyPath];
     }
-    if (![porters containsObject:porter]) {
-        [porters addObject:porter];
-    }
+    [porters addObject:porter];
     
     dispatch_semaphore_signal(_semaphore);
 }
@@ -86,12 +84,14 @@ static void _yj_kvo_enumerateKeysAndObjectsOfMapTable(NSMapTable *mapTable, void
 }
 
 - (void)untrackAllRelatedPorters {
-    NSMapTable *relatedPorters = self->_relatedPorters;
-    _yj_kvo_enumerateKeysAndObjectsOfMapTable(relatedPorters, ^(__kindof NSObject *target, NSMapTable *keyPathsAndPorters, BOOL *stop){
-        _yj_kvo_enumerateKeysAndObjectsOfMapTable(keyPathsAndPorters, ^(NSString *keyPath, NSHashTable *porters, BOOL *stop){
-            [target.yj_KVOPorterManager unemployPorters:[porters allObjects] forKeyPath:keyPath];
+    @autoreleasepool {
+        _yj_kvo_enumerateKeysAndObjectsOfMapTable(self->_relatedPorters, ^(__kindof NSObject *target, NSMapTable *keyPathsAndPorters, BOOL *stop){
+            _yj_kvo_enumerateKeysAndObjectsOfMapTable(keyPathsAndPorters, ^(NSString *keyPath, NSHashTable *porters, BOOL *stop){
+                [target.yj_KVOPorterManager unemployPorters:[porters allObjects] forKeyPath:keyPath];
+            });
         });
-    });
+        [_relatedPorters removeAllObjects];
+    }
 }
 
 - (void)dealloc {

@@ -34,10 +34,8 @@
         portersForKeyPath = [NSMutableArray new];
         _porters[keyPath] = portersForKeyPath;
     }
-    if (![portersForKeyPath containsObject:porter]) {
-        [portersForKeyPath addObject:porter];
-        [_target addObserver:porter forKeyPath:keyPath options:options context:NULL];
-    }
+    [portersForKeyPath addObject:porter];
+    [_target addObserver:porter forKeyPath:keyPath options:options context:NULL];
     
     dispatch_semaphore_signal(_semaphore);
 }
@@ -57,27 +55,16 @@
     dispatch_semaphore_signal(_semaphore);
 }
 
-BOOL (^yj_kvo_containsIdenticalObjects)(NSArray *, NSArray *) = ^BOOL(NSArray *arr1, NSArray *arr2) {
-    if (arr1.count > arr2.count)
-        return NO;
-    
-    for (id obj1 in arr1) {
-        for (id obj2 in arr2) {
-            if (obj1 != obj2) {
-                return NO;
-            }
-        }
-    }
-    return YES;
-};
-
 - (void)unemployPorters:(NSArray <_YJKVOPorter *> *)porters forKeyPath:(NSString *)keyPath {
     NSMutableArray <_YJKVOPorter *> *portersForKeyPath = _porters[keyPath];
     if (!portersForKeyPath.count)
         return;
     
-    if (!yj_kvo_containsIdenticalObjects(portersForKeyPath, porters))
-        return;
+    for (_YJKVOPorter *porter in porters) {
+        if (![portersForKeyPath containsObject:porter]) {
+            return;
+        }
+    }
     
     dispatch_semaphore_wait(_semaphore, DISPATCH_TIME_FOREVER);
     

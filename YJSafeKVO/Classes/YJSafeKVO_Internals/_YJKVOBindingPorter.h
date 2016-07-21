@@ -10,7 +10,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-typedef BOOL(^YJKVOValueTakenHandler)(id observer, id target, id _Nullable newValue);
+typedef BOOL(^YJKVOValueTakenHandler)(id subscriber, id target, id _Nullable newValue);
 
 /// The class for deliver the value changes.
 
@@ -18,11 +18,21 @@ __attribute__((visibility("hidden")))
 @interface _YJKVOBindingPorter : _YJKVOPorter
 
 /// The designated initializer
-- (instancetype)initWithObserver:(__kindof NSObject *)observer
-                 observerKeyPath:(NSString *)observerKeyPath;
+- (instancetype)initWithTarget:(__kindof NSObject *)target
+                    subscriber:(__kindof NSObject *)subscriber
+                 targetKeyPath:(NSString *)targetKeyPath
+             subscriberKeyPath:(NSString *)subscriberKeyPath NS_DESIGNATED_INITIALIZER;
 
+/// Associate with subscribers's key path for applying changes directly.
+@property (nonatomic, readonly, copy) NSString *subscriberKeyPath;
+
+/// The value change callback block which only for converting changes.
 @property (nonatomic, copy) YJKVOValueReturnHandler convertHandler;
+
+/// The value change callback block which only for filtering changes.
 @property (nonatomic, copy) YJKVOValueTakenHandler takenHandler;
+
+/// The value change callback block which only called after applying changes.
 @property (nonatomic, copy) YJKVOObjectsHandler afterHandler;
 
 @end

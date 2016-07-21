@@ -11,24 +11,39 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-/// The class for deliver the value changes.
+/// The class for delivering the value changes.
 
 __attribute__((visibility("hidden")))
 @interface _YJKVOPorter : NSObject
 
 /// The designated initializer
-- (instancetype)initWithObserver:(__kindof NSObject *)observer
-                           queue:(nullable NSOperationQueue *)queue
-                         handler:(nullable YJKVOChangeHandler)handler;
+- (instancetype)initWithTarget:(__kindof NSObject *)target
+                    subscriber:(__kindof NSObject *)subscriber
+                 targetKeyPath:(NSString *)targetKeyPath NS_DESIGNATED_INITIALIZER;
 
-/// The observer matched with porter.
-@property (nonatomic, readonly, weak) __kindof NSObject *observer;
+/// Register KVO
+- (void)signUp;
 
-/// The operation queue for adding block.
-@property (nonatomic, readonly, strong) NSOperationQueue *queue;
+/// Unregister KVO
+- (void)resign;
+
+/// The KVO target.
+@property (nonatomic, readonly, assign) __kindof NSObject *target;
+
+/// The KVO subscriber.
+@property (nonatomic, readonly, assign) __kindof NSObject *subscriber;
+
+/// The key path of target for observing.
+@property (nonatomic, readonly, copy) NSString *targetKeyPath;
+
+/// The key value observing options, default is (.initial | .new)
+@property (nonatomic) NSKeyValueObservingOptions observingOptions;
+
+/// The operation queue for adding change handler.
+@property (nullable, nonatomic, strong) NSOperationQueue *queue;
 
 /// The default handler for handling the value changes.
-@property (nonatomic, readonly, copy) YJKVOChangeHandler handler;
+@property (nullable, nonatomic, copy) YJKVOChangeHandler changeHandler;
 
 @end
 

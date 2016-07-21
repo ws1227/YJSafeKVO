@@ -12,62 +12,54 @@
 #import "_YJKVOIdentifierGenerator.h"
 #import <objc/message.h>
 
-@implementation _YJKVOBindingPorter {
-    NSString *_observerKeyPath;
-}
+@implementation _YJKVOBindingPorter
 
-- (instancetype)initWithObserver:(__kindof NSObject *)observer
-                 observerKeyPath:(NSString *)observerKeyPath {
-    self = [super initWithObserver:observer queue:nil handler:nil];
+- (instancetype)initWithTarget:(__kindof NSObject *)target
+                    subscriber:(__kindof NSObject *)subscriber
+                 targetKeyPath:(NSString *)targetKeyPath
+             subscriberKeyPath:(NSString *)subscriberKeyPath {
+    
+    self = [super initWithTarget:target subscriber:subscriber targetKeyPath:targetKeyPath];
     if (self) {
-        _observerKeyPath = [observerKeyPath copy];
+        _subscriberKeyPath = [subscriberKeyPath copy];
     }
     return self;
 }
 
+- (instancetype)initWithTarget:(__kindof NSObject *)target subscriber:(__kindof NSObject *)subscriber targetKeyPath:(NSString *)targetKeyPath {
+    [NSException raise:NSGenericException format:@"Do not call %@ directly for %@.", NSStringFromSelector(_cmd), self.class];
+    return [self initWithTarget:target subscriber:subscriber targetKeyPath:targetKeyPath subscriberKeyPath:(id)[NSNull null]];
+}
+
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSString *,id> *)change context:(void *)context {
-    
-    __kindof NSObject *observer = self.observer;
-    NSString *observerKeyPath = self->_observerKeyPath;
-    
-    YJKVOValueReturnHandler convertHandler = self.convertHandler;
-    YJKVOObjectsHandler afterHandler = self.afterHandler;
-    YJKVOValueTakenHandler takenHandler = self.takenHandler;
     
     id newValue = change[NSKeyValueChangeNewKey];
     if (newValue == [NSNull null]) newValue = nil;
     
-    NSArray *pipeIDs = [observer.yj_KVOPipeIDKeeper pipeIdentifiers];
-    NSString *pipeID = [[_YJKVOIdentifierGenerator sharedGenerator] pipeIdentifierForObserver:observer
-                                                                              observerKeyPath:observerKeyPath
-                                                                                       target:object
-                                                                                targetKeyPath:keyPath];
-    if ([pipeIDs containsObject:pipeID]) {
+    NSString *pipeID = [[_YJKVOIdentifierGenerator sharedGenerator] pipeIdentifierForTarget:object
+                                                                                 subscriber:self.subscriber
+                                                                              targetKeyPath:keyPath
+                                                                          subscriberKeyPath:self.subscriberKeyPath];
+    
+    if ([self.subscriber.yj_KVOPipeIDKeeper containsPipeIdentifier:pipeID]) {
         
         BOOL taken = YES;
-        if (takenHandler) {
-            taken = takenHandler(observer, object, newValue);
+        if (self.takenHandler) {
+            taken = self.takenHandler(self.subscriber, object, newValue);
         }
         if (!taken) return;
         
         id convertedValue = newValue;
-        if (convertHandler) {
-            convertedValue = convertHandler(observer, object, newValue);
+        if (self.convertHandler) {
+            convertedValue = self.convertHandler(self.subscriber, object, newValue);
         }
         
-        [observer setValue:convertedValue forKeyPath:observerKeyPath];
+        [self.subscriber setValue:convertedValue forKeyPath:self.subscriberKeyPath];
         
-        if (afterHandler) {
-            afterHandler(observer, object);
+        if (self.afterHandler) {
+            self.afterHandler(self.subscriber, object);
         }
     }
 }
-
-#if DEBUG_YJ_SAFE_KVO
-- (void)dealloc {
-    NSLog(@"%@ deallocated.", self);
-}
-#endif
-
 
 @end

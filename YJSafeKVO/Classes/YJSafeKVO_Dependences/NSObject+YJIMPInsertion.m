@@ -75,16 +75,16 @@ static BOOL _yj_insertImpBlocksIntoMethod(id obj, SEL sel,
     BOOL isClass = yj_object_isClass(obj);
     Class cls = isClass ? obj : [obj class]; // NOT object_getClass(obj)
     
-    // get default imp from class
-    Method method = isClass ? class_getClassMethod(cls, sel) : class_getInstanceMethod(cls, sel);
-    void (*defaultImp)(__unsafe_unretained id, SEL) = (void(*)(__unsafe_unretained id, SEL))method_getImplementation(method);
-    if (!defaultImp) return NO;
-    
     // keep insertion in records
     NSString *identifier = [NSString stringWithFormat:@"B<%p> A<%p>", before, after];
     if (![[_YJIMPInsertionKeeper keeper] addIdentifier:identifier forClass:cls]) {
         return NO;
     }
+    
+    // get default imp from class
+    Method method = isClass ? class_getClassMethod(cls, sel) : class_getInstanceMethod(cls, sel);
+    void (*defaultImp)(__unsafe_unretained id, SEL) = (void(*)(__unsafe_unretained id, SEL))method_getImplementation(method);
+    if (!defaultImp) return NO;
     
     // insert additional blocks of code
     IMP newImp = imp_implementationWithBlock(^(__unsafe_unretained id _obj) {
@@ -123,6 +123,39 @@ static BOOL _yj_insertImpBlocksIntoMethod(id obj, SEL sel,
     
     // Insert method implementation before executing original dealloc implementation.
     [self performBlocksByInvokingSelector:deallocSEL before:block after:nil];
+}
+
+- (void)performSafeEqualityComparison {
+    
+    NSString *identifier = [NSString stringWithFormat:@"isEqual:"];
+    if (![[_YJIMPInsertionKeeper keeper] addIdentifier:identifier forClass:[self class]]) {
+        return;
+    }
+    
+    SEL equalitySEL = @selector(isEqual:);
+    Method equalityMtd = class_getInstanceMethod([self class], equalitySEL);
+    const char *equalityType = method_getTypeEncoding(equalityMtd);
+    
+    BOOL (*defaultImp)(__unsafe_unretained id, SEL, __unsafe_unretained id) =
+    (BOOL(*)(__unsafe_unretained id, SEL, __unsafe_unretained id))method_getImplementation(equalityMtd);
+    
+    IMP identityCheckingIMP = imp_implementationWithBlock(^BOOL(__unsafe_unretained id obj1, __unsafe_unretained id obj2){
+        return obj1 == obj2;
+    });
+    
+    // Add pointer comparison version of -isEqual: if you have not implemented yet.
+    BOOL added = class_addMethod([self class], equalitySEL, identityCheckingIMP, equalityType);
+    if (added) return;
+    
+    // Add class type checking version of -isEqual: if you have implemented in your code.
+    IMP modifiedIMP = imp_implementationWithBlock(^BOOL(__unsafe_unretained id obj1, __unsafe_unretained id obj2){
+        if ([obj1 class] != [obj2 class]) {
+            return NO;
+        } else {
+            return defaultImp(obj1, equalitySEL, obj2);
+        }
+    });
+    method_setImplementation(equalityMtd, modifiedIMP);
 }
 
 @end

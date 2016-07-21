@@ -19,14 +19,14 @@
     return sharedGenerator;
 }
 
-- (NSString *)pipeIdentifierForObserver:(__kindof NSObject *)observer
-                        observerKeyPath:(NSString *)observerKeyPath
-                                 target:(__kindof NSObject *)target
-                          targetKeyPath:(NSString *)targetKeyPath {
+- (NSString *)pipeIdentifierForTarget:(__kindof NSObject *)target
+                           subscriber:(__kindof NSObject *)subscriber
+                        targetKeyPath:(NSString *)targetKeyPath
+                    subscriberKeyPath:(NSString *)subscriberKeyPath {
     
     return [NSString stringWithFormat:@"%@|%@",
             [self keyValueCodingIdentifierForObject:target keyPath:targetKeyPath],
-            [self keyValueCodingIdentifierForObject:observer keyPath:observerKeyPath]];
+            [self keyValueCodingIdentifierForObject:subscriber keyPath:subscriberKeyPath]];
 }
 
 - (NSString *)keyValueCodingIdentifierForObject:(__kindof NSObject *)object

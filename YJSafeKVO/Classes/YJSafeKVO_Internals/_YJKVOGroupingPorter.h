@@ -15,14 +15,17 @@ NS_ASSUME_NONNULL_BEGIN
 __attribute__((visibility("hidden")))
 @interface _YJKVOGroupingPorter : _YJKVOPorter
 
-+ (instancetype)porterForObserver:(__kindof NSObject *)observer
-                          targets:(NSArray <__kindof NSObject *> *)targets
-                          handler:(YJKVOTargetsHandler)targetsHandler;
+/// Associate with a group of targets for value change callback.
+- (void)associateWithGroupTarget:(NSArray <__kindof NSObject *> *)groupTargets;
 
-+ (instancetype)porterForObserver:(__kindof NSObject *)observer
-                  observerKeyPath:(NSString *)observerKeyPath
-                          targets:(NSArray <__kindof NSObject *> *)targets
-                          handler:(YJKVOTargetsReturnHandler)targetsReturnHandler;
+/// Associate with subscribers's key path for applying changes directly.
+@property (nullable, nonatomic, copy) NSString *subscriberKeyPath;
+
+/// The value change callback block.
+@property (nullable, nonatomic, copy) YJKVOTargetsHandler targetsHandler;
+
+/// The value change callback block which only for converting changes.
+@property (nullable, nonatomic, copy) YJKVOTargetsReturnHandler targetsReturnHandler;
 
 @end
 

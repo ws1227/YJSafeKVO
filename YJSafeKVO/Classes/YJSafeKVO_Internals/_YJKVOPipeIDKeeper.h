@@ -11,19 +11,19 @@
 NS_ASSUME_NONNULL_BEGIN
 
 /// Class for keeping identifiers associated with the KVO pipe feature.
-/// This class will be attached to observer.
+/// This class will be attached to subscriber.
 
 __attribute__((visibility("hidden")))
 @interface _YJKVOPipeIDKeeper : NSObject
 
 /// designated initializer
-- (instancetype)initWithObserver:(id)observer;
+- (instancetype)initWithSubscriber:(__kindof NSObject *)subscriber NS_DESIGNATED_INITIALIZER;
 
 /// add pipe identifier
 - (void)addPipeIdentifier:(NSString *)pipeIdentifier;
 
-/// returns all related pipe identifiers
-- (NSArray *)pipeIdentifiers;
+/// check if contains this pipe identifiers
+- (BOOL)containsPipeIdentifier:(NSString *)pipeIdentifier;
 
 @end
 

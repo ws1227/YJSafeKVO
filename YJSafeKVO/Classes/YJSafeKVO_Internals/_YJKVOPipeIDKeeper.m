@@ -7,21 +7,27 @@
 //
 
 #import "_YJKVOPipeIDKeeper.h"
+#import "_YJKVODefines.h"
 
 @implementation _YJKVOPipeIDKeeper {
-    __unsafe_unretained id _observer;
-    dispatch_semaphore_t _semaphore;
+    __unsafe_unretained __kindof NSObject *_subscriber;
     NSMutableArray <NSString *> *_pipeIdentifiers;
+    dispatch_semaphore_t _semaphore;
 }
 
-- (instancetype)initWithObserver:(id)observer {
+- (instancetype)initWithSubscriber:(__kindof NSObject *)subscriber {
     self = [super init];
     if (self) {
-        _observer = observer;
+        _subscriber = subscriber;
         _semaphore = dispatch_semaphore_create(1);
         _pipeIdentifiers = [[NSMutableArray alloc] initWithCapacity:50];
     }
     return self;
+}
+
+- (instancetype)init {
+    [NSException raise:NSGenericException format:@"Do not call init directly for %@.", self.class];
+    return [self initWithSubscriber:(id)[NSNull null]];
 }
 
 - (void)addPipeIdentifier:(NSString *)pipeIdentifier {
@@ -30,8 +36,18 @@
     dispatch_semaphore_signal(_semaphore);
 }
 
-- (NSArray *)pipeIdentifiers {
-    return [_pipeIdentifiers copy];
+- (BOOL)containsPipeIdentifier:(NSString *)pipeIdentifier {
+    return [_pipeIdentifiers containsObject:pipeIdentifier];
 }
+
+- (NSString *)description {
+    return [NSString stringWithFormat:@"<%@: %p> (subscriber <%@: %p>)", self.class, self, _subscriber.class, _subscriber];
+}
+
+#if YJ_KVO_DEBUG
+- (void)dealloc {
+    NSLog(@"%@ deallocated.", self);
+}
+#endif
 
 @end

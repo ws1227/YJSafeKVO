@@ -8,16 +8,16 @@
 
 #import <Foundation/Foundation.h>
 
-@class _YJKVOPorterManager, _YJKVOPorterTracker, _YJKVOPipeIDKeeper;
+@class _YJKVOSubscriberManager, _YJKVOPorterManager, _YJKVOPipeIDKeeper;
 
 
 @interface NSObject (YJKVOExtension)
 
-/// Associated with a porter manager for managing porters
-@property (nonatomic, strong) _YJKVOPorterManager *yj_KVOPorterManager;
+/// Associated with a subscriber manager for target managing subscribers.
+@property (nonatomic, strong) _YJKVOSubscriberManager *yj_KVOSubscriberManager;
 
-/// Associated with a tracker for tracking porters
-@property (nonatomic, strong) _YJKVOPorterTracker *yj_KVOPorterTracker;
+/// Associated with a porter manager for subcriber managing porters.
+@property (nonatomic, strong) _YJKVOPorterManager *yj_KVOPorterManager;
 
 /// Associated with a pipeID keeper for keeping pipe identifier
 @property (nonatomic, strong) _YJKVOPipeIDKeeper *yj_KVOPipeIDKeeper;

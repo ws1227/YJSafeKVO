@@ -8,6 +8,7 @@
 
 #import <objc/runtime.h>
 #import "NSObject+YJSafeKVO.h"
+#import "NSObject+YJKVOExtension.h"
 #import "_YJKVOPorter.h"
 #import "_YJKVOGroupingPorter.h"
 #import "_YJKVOExecutiveOfficer.h"
@@ -45,14 +46,13 @@ YJKVOChangeHandler (^yj_convertedKVOChangeHandler)(YJKVOValueHandler) = ^YJKVOCh
     for (PACK targetAndKeyPath in targetsAndKeyPaths) {
         if (targetAndKeyPath.isValid) {
             
-            _YJKVOGroupingPorter *porter = [_YJKVOGroupingPorter porterForObserver:self
-                                                                           targets:[targets copy]
-                                                                           handler:updates];
-            [[_YJKVOExecutiveOfficer officer] registerPorter:porter
-                                                 forObserver:self
-                                                      target:targetAndKeyPath.object
-                                               targetKeyPath:targetAndKeyPath.keyPath
-                                                     options:(NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew)];
+            _YJKVOGroupingPorter *porter = [[_YJKVOGroupingPorter alloc] initWithTarget:targetAndKeyPath.object
+                                                                             subscriber:self
+                                                                          targetKeyPath:targetAndKeyPath.keyPath];
+            porter.targetsHandler = updates;
+            [porter associateWithGroupTarget:targets];
+            
+            [[_YJKVOExecutiveOfficer officer] organizeTarget:targetAndKeyPath subscriber:self porter:porter];
         }
     }
 }
@@ -88,13 +88,11 @@ YJKVOChangeHandler (^yj_convertedKVOChangeHandler)(YJKVOValueHandler) = ^YJKVOCh
                 queue:(nullable NSOperationQueue *)queue
               changes:(void(^)(id receiver, id target, id _Nullable newValue, NSDictionary *change))changes {
     
-    _YJKVOPorter *porter = [[_YJKVOPorter alloc] initWithObserver:self queue:nil handler:changes];
+    _YJKVOPorter *porter = [[_YJKVOPorter alloc] initWithTarget:target subscriber:self targetKeyPath:keyPath];
+    porter.observingOptions = options;
+    porter.changeHandler = changes;
     
-    [[_YJKVOExecutiveOfficer officer] registerPorter:porter
-                                         forObserver:self
-                                              target:target
-                                       targetKeyPath:keyPath
-                                             options:options];
+    [[_YJKVOExecutiveOfficer officer] organizeTarget:target subscriber:self porter:porter];
 }
 
 - (void)unobserve:(PACK)targetAndKeyPath {
@@ -104,13 +102,11 @@ YJKVOChangeHandler (^yj_convertedKVOChangeHandler)(YJKVOValueHandler) = ^YJKVOCh
 }
 
 - (void)unobserveTarget:(__kindof NSObject *)target keyPath:(NSString *)keyPath {
-    [[_YJKVOExecutiveOfficer officer] unregisterPortersForObserver:self
-                                                        fromTarget:target
-                                                     targetKeyPath:keyPath];
+    [[_YJKVOExecutiveOfficer officer] dismissPortersFromTarget:target andSubscriber:self forTargetKeyPath:keyPath];
 }
 
 - (void)unobserveAll {
-    [[_YJKVOExecutiveOfficer officer] unregisterPortersForObserver:self];
+    [[_YJKVOExecutiveOfficer officer] dismissSubscriber:self];
 }
 
 @end

@@ -9,16 +9,16 @@
 #ifndef _YJKVODefines_h
 #define _YJKVODefines_h
 
-#define DEBUG_YJ_SAFE_KVO 0
+#define YJ_KVO_DEBUG 0
 
 typedef void(^YJKVOChangeHandler)(id receiver, id target, id newValue, NSDictionary *change);
 
 typedef void(^YJKVOTargetsHandler)(id receiver, NSArray *targets);
 typedef id(^YJKVOTargetsReturnHandler)(id receiver, NSArray *targets);
 
-typedef void(^YJKVOValueHandler)(id observer, id target, id newValue);
-typedef id(^YJKVOValueReturnHandler)(id observer, id target, id newValue);
+typedef void(^YJKVOValueHandler)(id subscriber, id target, id newValue);
+typedef id(^YJKVOValueReturnHandler)(id subscriber, id target, id newValue);
 
-typedef void(^YJKVOObjectsHandler)(id observer, id target);
+typedef void(^YJKVOObjectsHandler)(id subscriber, id target);
 
 #endif /* _YJKVODefines_h */

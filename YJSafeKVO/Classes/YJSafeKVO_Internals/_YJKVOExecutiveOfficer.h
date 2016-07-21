@@ -19,19 +19,20 @@ __attribute__((visibility("hidden")))
 /// singleton object
 + (instancetype)officer;
 
-/// add porter to Apple's KVO and manage it by other classes.
-- (void)registerPorter:(__kindof _YJKVOPorter *)porter
-           forObserver:(__kindof NSObject *)observer
-                target:(__kindof NSObject *)target
-         targetKeyPath:(NSString *)targetKeyPath
-               options:(NSKeyValueObservingOptions)options;
+/// register KVO and organize all related objects into KVO chain.
+- (void)organizeTarget:(__kindof NSObject *)target
+            subscriber:(__kindof NSObject *)subscriber
+                porter:(__kindof _YJKVOPorter *)porter;
 
-/// remove porters out of KVO.
-- (void)unregisterPortersForObserver:(__kindof NSObject *)observer
-                          fromTarget:(__kindof NSObject *)target
-                       targetKeyPath:(NSString *)targetKeyPath;
+/// dismiss specified target from KVO chain.
+- (void)dismissTarget:(__kindof NSObject *)target;
 
-/// remove porters out of KVO.
-- (void)unregisterPortersForObserver:(__kindof NSObject *)observer;
+/// dismiss related porters from KVO chain.
+- (void)dismissPortersFromTarget:(__kindof NSObject *)target
+                   andSubscriber:(__kindof NSObject *)subscriber
+                forTargetKeyPath:(NSString *)targetKeyPath;
+
+/// dismiss specified subscriber from KVO chain.
+- (void)dismissSubscriber:(__kindof NSObject *)subscriber;
 
 @end

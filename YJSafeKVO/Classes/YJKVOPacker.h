@@ -56,7 +56,7 @@ typedef YJKVOPacker * PACK;
 
 
 /**
- @brief Bind observer with target for receiving value changes. This will receive value immediately.
+ @brief Bind subscriber with target for receiving value changes. This will receive value immediately.
  @discussion After calling [A bound:B], the data flow will come from B to A.
  @warning Make sure the binding keyPaths on both sides are same type.
  @warning Using this for single direction. If [A bound:B] then [B bound:A], you will get infinite loop.
@@ -66,7 +66,7 @@ typedef YJKVOPacker * PACK;
 
 
 /**
- @brief Making a pipe between observer and target for receiving value changes.
+ @brief Making a pipe between subscriber and target for receiving value changes.
  @discussion After calling [A piped:B], later the data flow will come from B to A.
  @discussion Calling [[A piped:B] ready] will get same results as [A bound:B]
  @warning Using this for single direction. If [A piped:B] then [B piped:A], you will get infinite loop.
@@ -84,31 +84,31 @@ typedef YJKVOPacker * PACK;
 
 
 /**
- @brief If the new changes should be taken (meaning accepted by observer).
- @param The taken block for deciding if new changes should be applied to observer.
+ @brief If the new changes should be taken (meaning accepted by subscriber).
+ @param The taken block for deciding if new changes should be applied to subscriber.
  */
-- (PACK)taken:(BOOL(^)(id observer, id target, id _Nullable newValue))taken;
+- (PACK)taken:(BOOL(^)(id subscriber, id target, id _Nullable newValue))taken;
 
 
 /**
  @brief Convert the newValue to other kind of object as new returned value.
  @param The convert block for value convertion.
  */
-- (PACK)convert:(nullable id(^)(id observer, id target, id _Nullable newValue))convert;
+- (PACK)convert:(nullable id(^)(id subscriber, id target, id _Nullable newValue))convert;
 
 
 /**
  @brief Get called after each pipe finished.
  @param The after block for additional callback.
  */
-- (PACK)after:(void(^)(id observer, id target))after;
+- (PACK)after:(void(^)(id subscriber, id target))after;
 
 
 /**
  @brief Receiving changes from multiple targets with keyPaths.
- @param converge The block for reducing the result, then returns a result for setting observer's keyPath.
+ @param converge The block for reducing the result, then returns a result for setting subscriber's keyPath.
  */
-- (void)flooded:(NSArray <PACK> *)targetsAndKeyPaths converge:(nullable id(^)(id observer, NSArray *targets))converge;
+- (void)flooded:(NSArray <PACK> *)targetsAndKeyPaths converge:(nullable id(^)(id subscriber, NSArray *targets))converge;
 
 @end
 

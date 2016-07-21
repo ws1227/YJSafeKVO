@@ -61,52 +61,54 @@
 
 - (void)_pipedFrom:(PACK)targetAndKeyPath options:(NSKeyValueObservingOptions)options {
     if (targetAndKeyPath.isValid) {
-        __kindof NSObject *observer = self.object;
-        NSString *observerKeyPath = self.keyPath;
         
+        __kindof NSObject *target = targetAndKeyPath.object;
+        __kindof NSObject *subscriber = self.object;
+        NSString *targetKeyPath = targetAndKeyPath.keyPath;
+        NSString *subscriberKeyPath = self.keyPath;
+
         // generate pipe id
-        NSString *identifier = [[_YJKVOIdentifierGenerator sharedGenerator] pipeIdentifierForObserver:observer
-                                                                                      observerKeyPath:observerKeyPath
-                                                                                               target:targetAndKeyPath.object
-                                                                                        targetKeyPath:targetAndKeyPath.keyPath];
+        NSString *identifier = [[_YJKVOIdentifierGenerator sharedGenerator] pipeIdentifierForTarget:target
+                                                                                         subscriber:subscriber
+                                                                                      targetKeyPath:targetKeyPath
+                                                                                  subscriberKeyPath:subscriberKeyPath];
         // keep pipe id
-        _YJKVOPipeIDKeeper *pipeIDKeeper = observer.yj_KVOPipeIDKeeper;
+        _YJKVOPipeIDKeeper *pipeIDKeeper = subscriber.yj_KVOPipeIDKeeper;
         if (!pipeIDKeeper) {
-            pipeIDKeeper = [[_YJKVOPipeIDKeeper alloc] initWithObserver:observer];
-            observer.yj_KVOPipeIDKeeper = pipeIDKeeper;
+            pipeIDKeeper = [[_YJKVOPipeIDKeeper alloc] initWithSubscriber:subscriber];
+            subscriber.yj_KVOPipeIDKeeper = pipeIDKeeper;
         }
         [pipeIDKeeper addPipeIdentifier:identifier];
         
         // generate pipe porter
-        _YJKVOBindingPorter *porter = [[_YJKVOBindingPorter alloc] initWithObserver:observer
-                                                                    observerKeyPath:observerKeyPath];
+        _YJKVOBindingPorter *porter = [[_YJKVOBindingPorter alloc] initWithTarget:target
+                                                                       subscriber:subscriber
+                                                                    targetKeyPath:targetKeyPath
+                                                                subscriberKeyPath:subscriberKeyPath];
+        porter.observingOptions = options;
         [targetAndKeyPath setBindingPorter:porter];
         
         // register pipe porter
-        [[_YJKVOExecutiveOfficer officer] registerPorter:porter
-                                             forObserver:observer
-                                                  target:targetAndKeyPath.object
-                                           targetKeyPath:targetAndKeyPath.keyPath
-                                                 options:options];
+        [[_YJKVOExecutiveOfficer officer] organizeTarget:target subscriber:subscriber porter:porter];
     }
 }
 
-- (id)taken:(BOOL(^)(id observer, id target, id newValue))taken {
+- (id)taken:(BOOL(^)(id subscriber, id target, id newValue))taken {
     self.bindingPorter.takenHandler = taken;
     return self;
 }
 
-- (id)convert:(id(^)(id observer, id target, id newValue))convert {
+- (id)convert:(id(^)(id subscriber, id target, id newValue))convert {
     self.bindingPorter.convertHandler = convert;
     return self;
 }
 
-- (id)after:(void(^)(id observer, id target))after {
+- (id)after:(void(^)(id subscriber, id target))after {
     self.bindingPorter.afterHandler = after;
     return self;
 }
 
-- (void)flooded:(NSArray <PACK> *)targetsAndKeyPaths converge:(id(^)(id observer, NSArray *targets))converge {
+- (void)flooded:(NSArray <PACK> *)targetsAndKeyPaths converge:(id(^)(id subscriber, NSArray *targets))converge {
     
     NSMutableArray *targets = [NSMutableArray arrayWithCapacity:targetsAndKeyPaths.count];
     for (PACK targetAndKeyPath in targetsAndKeyPaths) {
@@ -118,15 +120,19 @@
     for (PACK targetAndKeyPath in targetsAndKeyPaths) {
         if (targetAndKeyPath.isValid) {
             
-            _YJKVOGroupingPorter *porter = [_YJKVOGroupingPorter porterForObserver:self.object
-                                                                   observerKeyPath:self.keyPath
-                                                                           targets:[targets copy]
-                                                                           handler:converge];
-            [[_YJKVOExecutiveOfficer officer] registerPorter:porter
-                                                 forObserver:self.object
-                                                      target:targetAndKeyPath.object
-                                               targetKeyPath:targetAndKeyPath.keyPath
-                                                     options:(NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew)];
+            __kindof NSObject *target = targetAndKeyPath.object;
+            __kindof NSObject *subscriber = self.object;
+            NSString *targetKeyPath = targetAndKeyPath.keyPath;
+            NSString *subscriberKeyPath = self.keyPath;
+            
+            _YJKVOGroupingPorter *porter = [[_YJKVOGroupingPorter alloc] initWithTarget:target
+                                                                             subscriber:subscriber
+                                                                          targetKeyPath:targetKeyPath];
+            porter.subscriberKeyPath = subscriberKeyPath;
+            porter.targetsReturnHandler = converge;
+            [porter associateWithGroupTarget:targets];
+            
+            [[_YJKVOExecutiveOfficer officer] organizeTarget:target subscriber:subscriber porter:porter];
         }
     }
 }

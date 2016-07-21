@@ -7,101 +7,74 @@
 //
 
 #import "_YJKVOPorterManager.h"
-#import "_YJKVOPorter.h"
+#import "_YJKVODefines.h"
 
 @implementation _YJKVOPorterManager {
-    __unsafe_unretained id _target;
+    __unsafe_unretained __kindof NSObject *_subscriber;
+    NSMutableArray *_porters;
     dispatch_semaphore_t _semaphore;
-    NSMutableDictionary <NSString *, NSMutableArray <_YJKVOPorter *> *> *_porters;
 }
 
-- (instancetype)initWithObservedTarget:(id)target {
+- (instancetype)initWithSubscriber:(__kindof NSObject *)subscriber {
     self = [super init];
     if (self) {
-        _target = target;
+        _subscriber = subscriber;
+        _porters = [[NSMutableArray alloc] initWithCapacity:50];
         _semaphore = dispatch_semaphore_create(1);
-        _porters = [NSMutableDictionary new];
     }
     return self;
 }
 
-- (void)employPorter:(_YJKVOPorter *)porter forKeyPath:(NSString *)keyPath options:(NSKeyValueObservingOptions)options {
-    
+- (instancetype)init {
+    [NSException raise:NSGenericException format:@"Do not call init directly for %@.", self.class];
+    return [self initWithSubscriber:(id)[NSNull null]];
+}
+
+- (void)addPorter:(_YJKVOPorter *)porter {
     dispatch_semaphore_wait(_semaphore, DISPATCH_TIME_FOREVER);
-    
-    NSMutableArray *portersForKeyPath = _porters[keyPath];
-    if (!portersForKeyPath) {
-        portersForKeyPath = [NSMutableArray new];
-        _porters[keyPath] = portersForKeyPath;
-    }
-    [portersForKeyPath addObject:porter];
-    [_target addObserver:porter forKeyPath:keyPath options:options context:NULL];
-    
+    [_porters addObject:porter];
     dispatch_semaphore_signal(_semaphore);
 }
 
-- (void)unemployPortersForKeyPath:(NSString *)keyPath {
-    NSMutableArray <_YJKVOPorter *> *portersForKeyPath = _porters[keyPath];
-    if (!portersForKeyPath.count)
-        return;
-    
+- (void)removePorter:(_YJKVOPorter *)porter {
     dispatch_semaphore_wait(_semaphore, DISPATCH_TIME_FOREVER);
-    
-    [portersForKeyPath enumerateObjectsUsingBlock:^(_YJKVOPorter * _Nonnull porter, NSUInteger idx, BOOL * _Nonnull stop) {
-        [_target removeObserver:porter forKeyPath:keyPath];
-    }];
-    [_porters removeObjectForKey:keyPath];
-    
+    [_porters removeObject:porter];
     dispatch_semaphore_signal(_semaphore);
 }
 
-- (void)unemployPorters:(NSArray <_YJKVOPorter *> *)porters forKeyPath:(NSString *)keyPath {
-    NSMutableArray <_YJKVOPorter *> *portersForKeyPath = _porters[keyPath];
-    if (!portersForKeyPath.count)
-        return;
-    
-    for (_YJKVOPorter *porter in porters) {
-        if (![portersForKeyPath containsObject:porter]) {
-            return;
-        }
-    }
-    
+- (void)removePorters:(NSArray <_YJKVOPorter *> *)porters {
     dispatch_semaphore_wait(_semaphore, DISPATCH_TIME_FOREVER);
-    
-    [porters enumerateObjectsUsingBlock:^(_YJKVOPorter * _Nonnull porter, NSUInteger idx, BOOL * _Nonnull stop) {
-        [_target removeObserver:porter forKeyPath:keyPath];
-    }];
-    
-    [portersForKeyPath removeObjectsInArray:porters];
-    if (!portersForKeyPath.count) {
-        [_porters removeObjectForKey:keyPath];
-    }
-    
+    [_porters removeObjectsInArray:porters];
     dispatch_semaphore_signal(_semaphore);
 }
 
-- (void)unemployAllPorters {
-    if (!_porters.count)
-        return;
-    
+- (void)removeAllPorters {
     dispatch_semaphore_wait(_semaphore, DISPATCH_TIME_FOREVER);
-    
-    [_porters enumerateKeysAndObjectsUsingBlock:^(id _Nonnull keyPath, NSMutableArray *  _Nonnull portersForKeyPath, BOOL * _Nonnull stop) {
-        [portersForKeyPath enumerateObjectsUsingBlock:^(_YJKVOPorter * _Nonnull porter, NSUInteger idx, BOOL * _Nonnull stop) {
-            [_target removeObserver:porter forKeyPath:keyPath];
-        }];
-    }];
     [_porters removeAllObjects];
-    
     dispatch_semaphore_signal(_semaphore);
 }
 
-
-- (void)dealloc {
-    _target = nil;
-#if DEBUG_YJ_SAFE_KVO
-    NSLog(@"%@ deallocated.", self);
-#endif
+- (void)enumeratePortersUsingBlock:(void (^)(_YJKVOPorter *porter, BOOL *stop))block {
+    id obj = nil; BOOL stop = NO;
+    NSEnumerator *enumerator = [_porters objectEnumerator];
+    while (obj = [enumerator nextObject]) {
+        if (block) block(obj, &stop);
+        if (stop) break;
+    }
 }
+
+- (NSUInteger)numberOfPorters {
+    return _porters.count;
+}
+
+- (NSString *)description {
+    return [NSString stringWithFormat:@"<%@: %p> (subscriber <%@: %p>)", self.class, self, _subscriber.class, _subscriber];
+}
+
+#if YJ_KVO_DEBUG
+- (void)dealloc {
+    NSLog(@"%@ deallocated.", self);
+}
+#endif
 
 @end

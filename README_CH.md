@@ -39,7 +39,7 @@ Context: 0x0'
 
 ### YJSafeKVO的范式
 
-虽然不管这些API是有多么的难用跟危险，`KVO`本身还是相当的重要。但是作为一名开发者，我只不过想调用一些简单的方法来完成目的而已，于是这里有了`YJSafeKVO`。有3种方法来使用它：
+虽然不管这些API是有多么的难用跟危险，`KVO`本身还是相当的重要。但是作为一名开发者，我只不过想调用一些简单的方法来完成目的而已，于是这里有了`YJSafeKVO`。其包含3种模式：
 
 * 观察模式
 * 订阅模式
@@ -165,7 +165,7 @@ Context: 0x0'
               |--------------------------------------|
           Subscriber1 (weak)                    Subscriber2 (weak)   ...
               |                                      |
-        Porter Manager			                   Porter Manager
+        Porter Manager                         Porter Manager
    |----------|-----------|                    |-----|-----
 Porter1    Porter2     Porter3  ...         Porter4      ...
    |          |           |                    |
@@ -183,7 +183,7 @@ Porter1    Porter2     Porter3  ...         Porter4      ...
               |-------------------|------------------|
            Porter1             Porter2            Porter3   ...
               |                   |                  |
-			   (block)             (block)            (block)
+           (block)             (block)            (block)
 
 ```
 <br>
@@ -242,9 +242,6 @@ Porter1    Porter2     Porter3  ...         Porter4      ...
 
 <br>
 
-
-### 关于疑虑
-
 #### 如果牵扯进了其他线程该怎么办 ？
 
 比如你观察的属性在其他线程中被赋值，但是你期望block能在主线程中回调并且更新UI。你可以专门指定一个`NSOperationQueue`对象作为参数用于回调。
@@ -259,12 +256,6 @@ Porter1    Porter2     Porter3  ...         Porter4      ...
 ```
 
 如果你对`NSNotificationCenter`的`-addObserverForName:object:queue:usingBlock:`不陌生的话，那么使用上面的方法就不成问题了。
-
-<br>
-
-#### 对于使用`YJSafeKVO`提供的接口还需要注意哪些问题呢 ?
-
-当你调用任何带有`unobserve..`前缀的方法时，它所做的只是清除由`YJSafeKVO`隐式生成的观察者，而不会好心地去帮你清理其他的观察者（比如你自己使用系统提供的方法或者其他第三方库的方法创建的观察者）。
 
 <br>
 

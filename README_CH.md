@@ -257,22 +257,24 @@ Porter1    Porter2     Porter3  ...         Porter4      ...
 
 如果你对`NSNotificationCenter`的`-addObserverForName:object:queue:usingBlock:`不陌生的话，那么使用上面的方法就不成问题了。
 
+<br>
+
 #### 观察模式 还是 广播模式 ？
 
 简单说明下`观察模式`和`广播模式`的区别：
 
-* `[observer observe:PACK(target, keyPath) updates:block]`会在以下情况中释放block: 
-	- observer被释放的时候
+* `[subscriber observe:PACK(target, keyPath) updates:block]`会在以下情况中释放block: 
+	- subscriber被释放的时候
 	- target被释放的时候
-	- 调用`[observer unobserve:PACK(target, keyPath)]`的时候
+	- 调用`[subscriber unobserve:PACK(target, keyPath)]`的时候
 * `[PACK(sender, keyPath) post:block]`会在以下情况中释放block:
 	- sender被释放的时候
 	- 调用`[PACK(sender, keyPath) stop]`的时候
 
 举个栗子：如果你打算观察一个单例对象的属性变化时，建议使用“观察模式”而非“广播模式”。
 
-* 使用了“观察模式” － 由于观察者不会被它的目标对象强引用持有，因此可以随时被释放。当观察者被释放的时候，block就被自动释放了。就像上面介绍过的只有相应的树形分支会被释放。
-* 使用了“广播模式” － 如果你打算释放post的block，就需要手动调用`[PACK(singleton, property) stop]`，结果有可能就释放了所有树形结构中包含该keyPath的block，导致其它地方的代码中需要观察变化的对象无法继续接收结果了。
+* 使用了“观察模式”的话 － 由于订阅者不会被它的目标对象强引用持有，因此可以随时被释放。当订阅者被释放的时候，block就被自动释放了。就像上面介绍过的只有相应的树形分支会被释放。
+* 使用了“广播模式”的话 － 如果你打算释放post的block，就需要手动调用`[PACK(singleton, property) stop]`，结果有可能就释放了所有树形结构中包含该keyPath的block，导致其它地方的代码中需要观察变化的对象无法继续接收结果了。
 
 <br>
 

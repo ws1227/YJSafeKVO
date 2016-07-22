@@ -65,8 +65,6 @@ Context: 0x0'
 }];
 ```
 
-无需额外的工作，没有崩溃，仅此而已。
-
 <br>
 
 #### 订阅模式 
@@ -151,6 +149,14 @@ Context: 0x0'
 
 <br>
 
+#### 还有一件事
+
+我需要在哪里`removeObserver:keyPath:`，不然崩溃怎么办？
+
+不会的，无需额外的工作，尽情地使用你喜欢的模式，让`YJSafeKVO`来处理其它的琐事，仅此而已。
+
+<br>
+
 ### 设计理念
 
 #### 结构图
@@ -222,7 +228,7 @@ Porter1    Porter2     Porter3  ...         Porter4      ...
 }];
 ```
 
-解决方法：将block中的变量`receiver`替换成`self`即可。
+解决方法：将block中的变量`receiver`替换成`self`即可，这里不需要再定义`__weak`了。
 
 ```
 [self observe:PACK(self.foo, name) updates:^(id self, id foo, id _Nullable newName) {

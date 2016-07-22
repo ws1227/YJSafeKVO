@@ -147,7 +147,9 @@ The difference between using `-observe:updates:` and `post:` is:
 	- sender is deallocated.
 	- manually call `[PACK(sender, keyPath) stop]`
 
-#### One more thing 
+<br>
+
+#### There is one more thing 
 
 Should I worry about removing observer before object is deallocated, so I can prevent crashes ? 
 

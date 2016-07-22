@@ -283,6 +283,14 @@ Here is a concrete example: If you want to observe the property value changes fr
 
 <br>
 
+#### Code snippets
+
+Tired of typing? There are pre-defined code snippets for you to integrate them into Xcode. One benefit by using `YJSafeKVO` code snippets is you just need to fill the placeholder token in the method template, which including the block parameters, so you can explicit define the type and variable name as the block parameter to avoid the retain cycle issue (e.g. write self inside of block).
+
+See "YJSafeKVO_Code_Snippets.md" file or click [here](https://github.com/huang-kun/YJSafeKVO/blob/master/YJSafeKVO_Code_Snippets.md) to check out code snippets, and define your own favourite ones.
+
+<br>
+
 ### Swift Compatibility
 
 The key value observing is the pattern from Cocoa programming. Any object as subclass of NSObject will get it for free. It also means this feature is not applied for Swift's struct, and for it's class object which root class is not NSObject.

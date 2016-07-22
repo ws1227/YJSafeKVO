@@ -1,7 +1,5 @@
 # YJSafeKVO Code Snippets 
 
-**Version >= 3.0**
-
 -observe:updates:
 
 ```

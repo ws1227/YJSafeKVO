@@ -282,6 +282,14 @@ Porter1    Porter2     Porter3  ...         Porter4      ...
 
 <br>
 
+#### 代码段
+
+方法名好长好难记怎么办？这里提供了预先定义的代码段，你可以拷贝到Xcode中去，定义自己喜欢的快捷键就好了。使用`YJSafeKVO`代码片段的好处之一就是：你只需要填入方法模版中的占位符就好，其中包括了block参数的类型和变量名称，这样显式写明的话就可以在一定程度上避免引用循环的问题。
+
+查看“YJSafeKVO_Code_Snippets.md”文件或者点击[这里](https://github.com/huang-kun/YJSafeKVO/blob/master/YJSafeKVO_Code_Snippets.md)获得代码段，或者定义自己喜欢的也可以哦。
+
+<br>
+
 ### 兼容Swift的情况
 
 由于`KVO`是源于`Cocoa`编程的范式，因此只要被观察的对象继承于`NSObject`的话，它自然会与生俱来这种特性，但是对于`Swift`来说，`struct`以及基类不属于`NSObject`的实例对象就无法使用`KVO`了。

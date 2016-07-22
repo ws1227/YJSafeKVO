@@ -15,9 +15,9 @@
 
 #pragma mark - YJSafeKVO implementations
 
-YJKVOChangeHandler (^yj_convertedKVOChangeHandler)(YJKVOValueHandler) = ^YJKVOChangeHandler(YJKVOValueHandler valueHander) {
+YJKVOChangeHandler (^yj_convertedKVOChangeHandler)(YJKVOObjectsAndValueHandler) = ^YJKVOChangeHandler(YJKVOObjectsAndValueHandler objectsAndValueHander) {
     void(^changeHandler)(id,id,id,NSDictionary *) = ^(id receiver, id target, id newValue, NSDictionary *change){
-        if (valueHander) valueHander(receiver, target, newValue);
+        if (objectsAndValueHander) objectsAndValueHander(receiver, target, newValue);
     };
     return changeHandler;
 };

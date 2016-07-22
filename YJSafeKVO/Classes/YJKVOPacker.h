@@ -37,11 +37,21 @@ id _YJKVO_retrieveTarget(NSArray *targets, NSString *variableName);
 typedef YJKVOPacker * PACK;
 
 
-/// The class for wrapping observed target and it's key path
-
+/// The class for wrapping observed target and it's key path.
+/// DO NOT USE "YJKVOPacker" directly, use PACK(OBJECT, KEYPATH) macro for objective c and use PACK( object, keyPath ) for swift.
 @interface YJKVOPacker : NSObject
 
-+ (instancetype)packerWithObject:(__kindof NSObject *)object keyPath:(NSString *)keyPath variableName:(nullable NSString *)variableName;
+/// The designated initializer, and do not call it directly, use PACK.
+- (instancetype)initWithObject:(__kindof NSObject *)object
+                       keyPath:(NSString *)keyPath
+                        NS_DESIGNATED_INITIALIZER
+                        NS_SWIFT_NAME(init(_:_:));
+
+/// The factory method initializer, and do not call it directly, use PACK.
++ (instancetype)packerWithObject:(__kindof NSObject *)object
+                         keyPath:(NSString *)keyPath
+                    variableName:(nullable NSString *)variableName
+                        NS_SWIFT_UNAVAILABLE("Use init(_:_:) instead.");
 
 @property (nonatomic, readonly, strong) __kindof NSObject *object;
 @property (nonatomic, readonly, strong) NSString *keyPath;
@@ -50,7 +60,9 @@ typedef YJKVOPacker * PACK;
 @end
 
 
-/// Binding Extension
+/* --------------------------------------------------------------------------------------------- */
+//                                            binding
+/* --------------------------------------------------------------------------------------------- */
 
 @interface YJKVOPacker (YJKVOBinding)
 
@@ -71,7 +83,7 @@ typedef YJKVOPacker * PACK;
  @discussion Calling [[A piped:B] ready] will get same results as [A bound:B]
  @warning Using this for single direction. If [A piped:B] then [B piped:A], you will get infinite loop.
  @param targetAndKeyPath    The target and its key path to observe. Using PACK(target, keyPath) to wrap them.
- @return It returns BIND that can be nested with additional calls.
+ @return It returns PACK object that can be nested with additional calls.
  */
 - (PACK)piped:(PACK)targetAndKeyPath;
 
@@ -109,6 +121,36 @@ typedef YJKVOPacker * PACK;
  @param converge The block for reducing the result, then returns a result for setting subscriber's keyPath.
  */
 - (void)flooded:(NSArray <PACK> *)targetsAndKeyPaths converge:(nullable id(^)(id subscriber, NSArray *targets))converge;
+
+
+/**
+ @brief Cutting off the binding relationship between subscriber's keyPath and target's keyPath.
+ @discussion This is for cutting off -bounds: or -piped:
+ @discussion After calling this, the subscriber with its key path will not receive the value changes
+             from specified target with its key path.
+ */
+- (void)cutOff:(PACK)targetAndKeyPath;
+
+@end
+
+
+/* --------------------------------------------------------------------------------------------- */
+//                                            posting
+/* --------------------------------------------------------------------------------------------- */
+
+@interface YJKVOPacker (YJKVOPosting)
+
+/**
+ @brief Post the value changes from sender's key path.
+ @param The post block will be called immediately and for each time when new value is being set.
+ */
+- (void)post:(void(^)(id _Nullable newValue))post;
+
+/**
+ @brief Stop posting the value changes.
+ @discussion After calling this, the post block will be released.
+ */
+- (void)stop;
 
 @end
 

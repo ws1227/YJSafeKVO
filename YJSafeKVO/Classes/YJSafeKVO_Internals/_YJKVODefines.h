@@ -16,9 +16,11 @@ typedef void(^YJKVOChangeHandler)(id receiver, id target, id newValue, NSDiction
 typedef void(^YJKVOTargetsHandler)(id receiver, NSArray *targets);
 typedef id(^YJKVOTargetsReturnHandler)(id receiver, NSArray *targets);
 
-typedef void(^YJKVOValueHandler)(id subscriber, id target, id newValue);
-typedef id(^YJKVOValueReturnHandler)(id subscriber, id target, id newValue);
+typedef void(^YJKVOObjectsAndValueHandler)(id subscriber, id target, id newValue);
+typedef id(^YJKVOObjectsAndValueReturnHandler)(id subscriber, id target, id newValue);
 
 typedef void(^YJKVOObjectsHandler)(id subscriber, id target);
+
+typedef void(^YJKVOValueHandler)(id newValue);
 
 #endif /* _YJKVODefines_h */

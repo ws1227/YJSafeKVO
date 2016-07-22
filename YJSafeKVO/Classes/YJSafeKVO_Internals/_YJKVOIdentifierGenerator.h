@@ -16,6 +16,7 @@ __attribute__((visibility("hidden")))
 /// singleton object
 + (instancetype)sharedGenerator;
 
+/// Generating a data flow identifier for each pipe.
 /// e.g. "Target<0x123>.keyPath|Subscriber<0x456>.keyPath"
 ///
 - (NSString *)pipeIdentifierForTarget:(__kindof NSObject *)target

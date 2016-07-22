@@ -10,15 +10,15 @@
 #import "_YJKVODefines.h"
 
 @implementation _YJKVOPorterManager {
-    __unsafe_unretained __kindof NSObject *_subscriber;
+    __unsafe_unretained __kindof NSObject *_owner;
     NSMutableArray *_porters;
     dispatch_semaphore_t _semaphore;
 }
 
-- (instancetype)initWithSubscriber:(__kindof NSObject *)subscriber {
+- (instancetype)initWithOwner:(__kindof NSObject *)owner {
     self = [super init];
     if (self) {
-        _subscriber = subscriber;
+        _owner = owner;
         _porters = [[NSMutableArray alloc] initWithCapacity:50];
         _semaphore = dispatch_semaphore_create(1);
     }
@@ -27,7 +27,7 @@
 
 - (instancetype)init {
     [NSException raise:NSGenericException format:@"Do not call init directly for %@.", self.class];
-    return [self initWithSubscriber:(id)[NSNull null]];
+    return [self initWithOwner:(id)[NSNull null]];
 }
 
 - (void)addPorter:(_YJKVOPorter *)porter {
@@ -54,7 +54,7 @@
     dispatch_semaphore_signal(_semaphore);
 }
 
-- (void)enumeratePortersUsingBlock:(void (^)(_YJKVOPorter *porter, BOOL *stop))block {
+- (void)enumeratePortersUsingBlock:(void (^)(__kindof _YJKVOPorter *porter, BOOL *stop))block {
     id obj = nil; BOOL stop = NO;
     NSEnumerator *enumerator = [_porters objectEnumerator];
     while (obj = [enumerator nextObject]) {
@@ -68,7 +68,7 @@
 }
 
 - (NSString *)description {
-    return [NSString stringWithFormat:@"<%@: %p> (subscriber <%@: %p>)", self.class, self, _subscriber.class, _subscriber];
+    return [NSString stringWithFormat:@"<%@: %p> (subscriber <%@: %p>)", self.class, self, _owner.class, _owner];
 }
 
 #if YJ_KVO_DEBUG

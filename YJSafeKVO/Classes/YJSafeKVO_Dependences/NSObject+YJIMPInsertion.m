@@ -76,7 +76,7 @@ static BOOL _yj_insertImpBlocksIntoMethod(id obj, SEL sel,
     Class cls = isClass ? obj : [obj class]; // NOT object_getClass(obj)
     
     // keep insertion in records
-    NSString *identifier = [NSString stringWithFormat:@"B<%p> A<%p>", before, after];
+    NSString *identifier = [NSString stringWithFormat:@"%@,Before<%p>After<%p>", NSStringFromSelector(sel), before, after];
     if (![[_YJIMPInsertionKeeper keeper] addIdentifier:identifier forClass:cls]) {
         return NO;
     }
@@ -105,6 +105,12 @@ static BOOL _yj_insertImpBlocksIntoMethod(id obj, SEL sel,
 }
 
 - (void)performBlockBeforeDeallocating:(void(^)(id))block {
+    
+    NSString *identifier = [NSString stringWithFormat:@"dealloc,<%p>", block];
+    if (![[_YJIMPInsertionKeeper keeper] addIdentifier:identifier forClass:[self class]]) {
+        return;
+    }
+    
     // Restriction for modifying -dealloc
     if (!block || ![self isKindOfClass:[NSObject class]] || [self isMemberOfClass:[NSObject class]])
         return;

@@ -8,7 +8,9 @@
 
 #import "_YJKVOPorter.h"
 
-@implementation _YJKVOPorter
+@implementation _YJKVOPorter {
+    BOOL _employed;
+}
 
 - (instancetype)initWithTarget:(__kindof NSObject *)target subscriber:(__kindof NSObject *)subscriber targetKeyPath:(NSString *)targetKeyPath {
     self = [super init];
@@ -27,10 +29,12 @@
 }
 
 - (void)signUp {
+    _employed = YES;
     [self.target addObserver:self forKeyPath:self.targetKeyPath options:self.observingOptions context:NULL];
 }
 
 - (void)resign {
+    _employed = NO;
     [self.target removeObserver:self forKeyPath:self.targetKeyPath context:NULL];
 }
 
@@ -43,8 +47,10 @@
     void(^kvoCallbackBlock)(void) = ^{
         id newValue = change[NSKeyValueChangeNewKey];
         if (newValue == [NSNull null]) newValue = nil;
-        if (self.changeHandler) {
+        if (self.changeHandler && self.subscriber) {
             self.changeHandler(self.subscriber, object, newValue, change);
+        } else if (self.valueHandler) {
+            self.valueHandler(newValue);
         }
     };
     
@@ -59,10 +65,13 @@
     return [NSString stringWithFormat:@"<%@: %p> (target <%@: %p>, subscriber <%@: %p>, targetKeyPath: %@)", self.class, self, self.target.class, self.target, self.subscriber.class, self.subscriber, self.targetKeyPath];
 }
 
-#if YJ_KVO_DEBUG
 - (void)dealloc {
+    if (_employed) {
+        [self resign];
+    }
+#if YJ_KVO_DEBUG
     NSLog(@"%@ deallocated.", self);
-}
 #endif
+}
 
 @end

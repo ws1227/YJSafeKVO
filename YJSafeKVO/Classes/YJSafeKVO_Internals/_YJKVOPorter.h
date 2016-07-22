@@ -18,7 +18,7 @@ __attribute__((visibility("hidden")))
 
 /// The designated initializer
 - (instancetype)initWithTarget:(__kindof NSObject *)target
-                    subscriber:(__kindof NSObject *)subscriber
+                    subscriber:(nullable __kindof NSObject *)subscriber
                  targetKeyPath:(NSString *)targetKeyPath NS_DESIGNATED_INITIALIZER;
 
 /// Register KVO
@@ -31,7 +31,7 @@ __attribute__((visibility("hidden")))
 @property (nonatomic, readonly, assign) __kindof NSObject *target;
 
 /// The KVO subscriber.
-@property (nonatomic, readonly, assign) __kindof NSObject *subscriber;
+@property (nullable, nonatomic, readonly, assign) __kindof NSObject *subscriber;
 
 /// The key path of target for observing.
 @property (nonatomic, readonly, copy) NSString *targetKeyPath;
@@ -44,6 +44,9 @@ __attribute__((visibility("hidden")))
 
 /// The default handler for handling the value changes.
 @property (nullable, nonatomic, copy) YJKVOChangeHandler changeHandler;
+
+/// The value handler for handling value changes.
+@property (nullable, nonatomic, copy) YJKVOValueHandler valueHandler;
 
 @end
 

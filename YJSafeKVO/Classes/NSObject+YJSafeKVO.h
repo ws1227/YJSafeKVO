@@ -30,8 +30,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param targetAndKeyPath    The YJKVOPacker object for wrapping object and its key path, using PACK(target, keyPath).
  @param updates             The block of code will be performed both immediately and when observed value changes.
  */
-- (void)observe:(PACK)targetAndKeyPath updates:(void(^)(id receiver, id target, id _Nullable newValue))updates
-            NS_SWIFT_UNAVAILABLE("Use observe(target:keyPath:updates:) instead.");
+- (void)observe:(PACK)targetAndKeyPath updates:(void(^)(id receiver, id target, id _Nullable newValue))updates;
 
 
 /**
@@ -40,8 +39,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param targetsAndKeyPaths  The array of YJKVOPacker object for wrapping object and its key path, using PACK(target, keyPath).
  @param updates             The block of code will be performed both immediately and when observed value changes.
  */
-- (void)observeGroup:(NSArray <PACK> *)targetsAndKeyPaths updates:(void(^)(id receiver, NSArray *targets))updates
-            NS_SWIFT_UNAVAILABLE("Use observe(target:keyPath:updates:) instead.");
+- (void)observeGroup:(NSArray <PACK> *)targetsAndKeyPaths updates:(void(^)(id receiver, NSArray *targets))updates;
 
 
 /**
@@ -55,8 +53,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)observe:(PACK)targetAndKeyPath
         options:(NSKeyValueObservingOptions)options
           queue:(nullable NSOperationQueue *)queue
-        changes:(void(^)(id receiver, id target, id _Nullable newValue, NSDictionary *change))changes
-            NS_SWIFT_UNAVAILABLE("Use observe(target:keyPath:options:queue:changes:) instead.");
+        changes:(void(^)(id receiver, id target, id _Nullable newValue, NSDictionary *change))changes;
 
 
 /**
@@ -64,7 +61,7 @@ NS_ASSUME_NONNULL_BEGIN
  
  @param targetAndKeyPath    The YJKVOPacker object for wrapping object and its key path, using PACK(target, keyPath).
  */
-- (void)unobserve:(PACK)targetAndKeyPath NS_SWIFT_UNAVAILABLE("Use unobserve(target:keyPath:) instead.");
+- (void)unobserve:(PACK)targetAndKeyPath;
 
 
 /* ------------------------------------------------------------------------------------------------------------ */

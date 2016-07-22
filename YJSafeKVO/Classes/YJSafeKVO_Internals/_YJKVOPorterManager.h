@@ -13,13 +13,13 @@
 NS_ASSUME_NONNULL_BEGIN
 
 /// The class for managing the KVO porters.
-/// This class will be attached to subscriber.
+/// This class will be attached to subscriber or sender.
 
 __attribute__((visibility("hidden")))
 @interface _YJKVOPorterManager : NSObject
 
 /// designated initializer
-- (instancetype)initWithSubscriber:(__kindof NSObject *)subscriber NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithOwner:(__kindof NSObject *)owner NS_DESIGNATED_INITIALIZER;
 
 /// Add porter
 - (void)addPorter:(_YJKVOPorter *)porter;
@@ -34,7 +34,7 @@ __attribute__((visibility("hidden")))
 - (void)removeAllPorters;
 
 /// Enumerate each porter
-- (void)enumeratePortersUsingBlock:(void (^)(_YJKVOPorter *porter, BOOL *stop))block;
+- (void)enumeratePortersUsingBlock:(void (^)(__kindof _YJKVOPorter *porter, BOOL *stop))block;
 
 /// Number of porters
 - (NSUInteger)numberOfPorters;

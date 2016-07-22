@@ -39,7 +39,15 @@ Context: 0x0'
 
 ### YJSafeKVO的范式
 
-虽然不管这些API是有多么的难用跟危险，`KVO`本身还是相当的重要。但是作为一名开发者，我只不过想调用一些简单的方法来完成目的而已。于是这里有了`YJSafeKVO`：
+虽然不管这些API是有多么的难用跟危险，`KVO`本身还是相当的重要。但是作为一名开发者，我只不过想调用一些简单的方法来完成目的而已，于是这里有了`YJSafeKVO`。有3种方法来使用它：
+
+* 观察模式
+* 订阅模式
+* 广播模式
+
+<br>
+
+#### 观察模式
 
 如果A要观察B的属性name的变化，调用方法如下：
 
@@ -61,9 +69,7 @@ Context: 0x0'
 
 <br>
 
-### 新特性
-
-#### 绑定 (2.1.2)
+#### 订阅模式 
 
 `YJSafeKVO`支持了绑定观察者与观察对象，当对象keyPath的值改变时，就直接设置到观察者的keyPath中，比如：
 
@@ -117,66 +123,102 @@ Context: 0x0'
 }];
 ```
 
+它还支持通过调用`-cutOff:`来斩断已建立的绑定关系。
+
+<br>
+
+#### 广播模式
+
+广播模式可以直接对外发布键值的更新。
+
+```
+[PACK(foo, name) post:^(NSString *name) {
+    NSLog(@"foo has changed a new name: %@.", name);
+}];
+```
+
+这里的foo被看作是发布者(sender)，当foo的name有改动时，就会调用block。
+
+简单说明下调用`-observe:updates:`和`post:`的区别：
+
+* `[subscriber observe:PACK(target, keyPath) updates:block]`会在以下情况中释放block: 
+	- subscriber被释放的时候
+	- target被释放的时候
+	- 调用`[subscriber unobserve:PACK(target, keyPath)]`的时候
+* `[PACK(sender, keyPath) post:block]`会在以下情况中释放block:
+	- sender被释放的时候
+	- 调用`[PACK(sender, keyPath) stop]`的时候
+
 <br>
 
 ### 设计理念
 
 #### 结构图
 
-这张图大致描绘了`YJSafeKVO`的关系结构
+这张图大致描绘了`观察模式`和`订阅模式`的树型结构
 
 ```
                                Target
                                   |
-                             PorterManager
+                          Subscriber Manager
                                   |
               |--------------------------------------|
-           keyPath1                              keyPath2 ...
-  |-----------|-----------|                    |-----|-----
-porter      porter      porter  ...          porter      ...
-  |           |           |                    |
-(block)     (block)     (block)              (block)
-  |-----|-----|           |                    |
-    Observer1         Observer2  ...       Observer1
+          Subscriber1 (weak)                    Subscriber2 (weak)   ...
+              |                                      |
+        Porter Manager			                   Porter Manager
+   |----------|-----------|                    |-----|-----
+Porter1    Porter2     Porter3  ...         Porter4      ...
+   |          |           |                    |
+(block)    (block)     (block)              (block)
 
 ```
 
+这张图描绘了`广播模式`的树型结构。
+
+```
+                                Sender
+                                  |
+                            Porter Manager
+                                  |
+              |-------------------|------------------|
+           Porter1             Porter2            Porter3   ...
+              |                   |                  |
+			   (block)             (block)            (block)
+
+```
 <br>
 
 #### 角色
 
-**被观察对象(Target)**
+**目标对象(Target) 以及 发布者(sender)**
 
-由于被观察对象是观测值变化的源头，并且它承担着及时通知观察者有关值改变的义务，因此被观察的对象处于KVO链条顶端。
+被观察的目标对象、以及发布者即是观测值变化的源头，它们总是处于KVO链条顶端。
+
+**订阅者(Subscriber)**
+
+调用`-observeTarget:` or `-observe:`的对象（或消息接收者）在这里应该被看成是观察者。因为它们才是真正需要观察并及时响应变化的对象。为了避免语义混淆，这里称之为订阅者。
 
 **搬运工(Porter)**
 
 搬运工在注册观察行为的时候被创建出来，它们的工作就是将新的变化值传递给真正想要处理这些变化的对象。它们会把变化包装在一个block中。
 
-**管理者(PorterManager)**
+**包工头(Porter Manager)**
 
-每个被观察的对象都有一个管理者，来管理这些由于注册观察行为而衍生的搬运工。管理者会把搬运工按照不同的keyPath划分为独立的小组。
+包工头负责管理搬运工。通常自己被订阅者或者发布者所拥有。
 
-由于管理搬运工的机制属于内在行为，那么当被观察者即将被释放的时候，这些搬运工会自动被移除，从而避免了大多数由人为地添加和移除操作不当而造成KVO的崩溃。
+**订阅组织者(Subscriber Manager)**
 
-**观察者(Observer)**
-
-调用`-observeTarget:` or `-observe:`的对象（或消息接收者）在这里应该被看成是观察者。因为它们才是真正需要观察并及时响应变化的对象。
+它负责管理订阅者，与包工头不一样的是，它不会跟每位订阅者建立强引用关系。
 
 <br>
 
-#### 所属关系
+#### 避免引用循环
 
-以下为`YJSafeKVO`内部对象的所有权关系。
-
-* 强引用链: 被观察者(Target) -> 管理者(PorterManager) -> 搬运工(Porters)
-* 弱引用链: 搬运工(Porter) -> 观察者(Observer) -> 被观察者(Target)
-
-为了保持这个所有权关系能够正常运作，在使用block的时候一定需要避免引用循环问题。
+使用block的时候一定需要避免引用循环问题。
 
 ```
 [self observe:PACK(self.foo, name) updates:^(id receiver, id target, id _Nullable newName) {
-    NSLog(@"%@", self); // 产生引用循环 (self -> foo -> porter -> block -> self)
+    NSLog(@"%@", self); // 产生引用循环
 }];
 ```
 
@@ -188,15 +230,15 @@ porter      porter      porter  ...          porter      ...
 }];
 ```
 
+顺便提一句，`-post:`方法的block中没有提供这样的参数，使用需注意。
+
 <br>
 
 #### 因果
 
-当被观察者释放的时候，与之相关的管理者以及所有搬运工都将被释放，也就意味着整个关系图的结束。
+当被目标对象或发布者被释放的时候，整个树型结构也随之被释放；如果订阅者先释放的话，在树型结构中只有相应的分支被释放而已。
 
-如果观察者在被观察者释放之前即将销毁的话，那么与之相关的搬运工也会跟着被释放。
-
-因此关于内部对象释放的工作都是自动完成的，条件就是被观察者或者观察者即将释放的时刻。但是如果二者都不会释放，这时候想要停止观察行为的话，可以人为调用`-[observer unobserve..]`方法来停止观察相应的keyPath。
+如果以上对象都没有释放，这时候想要停止观察行为的话，可以人为调用`-unobserve..`, `-cutOff:`或者`-stop`方法来停止接收变化。
 
 <br>
 
@@ -226,9 +268,56 @@ porter      porter      porter  ...          porter      ...
 
 <br>
 
-### 兼容情况
+### 兼容Swift的情况
 
 由于`KVO`是源于`Cocoa`编程的范式，因此只要被观察的对象继承于`NSObject`的话，它自然会与生俱来这种特性，但是对于`Swift`来说，`struct`以及基类不属于`NSObject`的实例对象就无法使用`KVO`了。
+
+观察模式:
+
+```
+foo.observe(PACK(bar, "name")) { (_, _, newValue) in
+    print("\(newValue)")
+}
+```
+
+订阅模式:
+
+```
+PACK(foo, "name").bound(PACK(bar, "name"))
+```
+
+建立一个复杂的管道:
+
+```
+PACK(foo, "name").piped(PACK(bar, "name"))
+    .taken { (_, _, newValue) -> Bool in
+        if let name = newValue as? String {
+            return name.characters.count > 3
+        }
+        return false
+    }
+    .convert { (_, _, newValue) -> AnyObject in
+        let name = newValue as! String
+        return name.uppercaseString
+    }
+    .after { (_, _) in
+        print("value updated.")
+    }
+    .ready()
+    
+bar.name = "Bar" // foo.name is not receiving "Bar"
+bar.name = "Barrrr" // foo.name is "BARRRR" 
+```
+
+广播模式:
+
+```
+PACK(foo, "name").post { (newValue) in
+    if let name = newValue as? String {
+        print("new name: \(name)")
+    }
+}
+```
 
 <br>
 

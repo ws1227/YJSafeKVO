@@ -65,6 +65,8 @@ Context: 0x0'
 }];
 ```
 
+这里A被称为“观察者”，或者“订阅者”；B被称作是被观察的“目标对象”。
+
 <br>
 
 #### 订阅模式 
@@ -137,16 +139,6 @@ Context: 0x0'
 
 这里的foo被看作是发布者(sender)，当foo的name有改动时，就会调用block。
 
-简单说明下调用`-observe:updates:`和`post:`的区别：
-
-* `[subscriber observe:PACK(target, keyPath) updates:block]`会在以下情况中释放block: 
-	- subscriber被释放的时候
-	- target被释放的时候
-	- 调用`[subscriber unobserve:PACK(target, keyPath)]`的时候
-* `[PACK(sender, keyPath) post:block]`会在以下情况中释放block:
-	- sender被释放的时候
-	- 调用`[PACK(sender, keyPath) stop]`的时候
-
 <br>
 
 #### 还有一件事
@@ -218,6 +210,16 @@ Porter1    Porter2     Porter3  ...         Porter4      ...
 
 <br>
 
+#### 因果
+
+当被目标对象或发布者被释放的时候，整个树型结构也随之被释放；如果订阅者先释放的话，在树型结构中只有相应的分支被释放而已。
+
+如果以上对象都没有释放，这时候想要停止观察行为的话，可以人为调用`-unobserve..`, `-cutOff:`或者`-stop`方法来停止接收变化。
+
+<br>
+
+### 温馨提示
+
 #### 避免引用循环
 
 使用block的时候一定需要避免引用循环问题。
@@ -240,15 +242,7 @@ Porter1    Porter2     Porter3  ...         Porter4      ...
 
 <br>
 
-#### 因果
-
-当被目标对象或发布者被释放的时候，整个树型结构也随之被释放；如果订阅者先释放的话，在树型结构中只有相应的分支被释放而已。
-
-如果以上对象都没有释放，这时候想要停止观察行为的话，可以人为调用`-unobserve..`, `-cutOff:`或者`-stop`方法来停止接收变化。
-
-<br>
-
-#### 如果牵扯进了其他线程该怎么办 ？
+#### 处理线程问题
 
 比如你观察的属性在其他线程中被赋值，但是你期望block能在主线程中回调并且更新UI。你可以专门指定一个`NSOperationQueue`对象作为参数用于回调。
 
@@ -262,6 +256,23 @@ Porter1    Porter2     Porter3  ...         Porter4      ...
 ```
 
 如果你对`NSNotificationCenter`的`-addObserverForName:object:queue:usingBlock:`不陌生的话，那么使用上面的方法就不成问题了。
+
+#### 观察模式 还是 广播模式 ？
+
+简单说明下`观察模式`和`广播模式`的区别：
+
+* `[observer observe:PACK(target, keyPath) updates:block]`会在以下情况中释放block: 
+	- observer被释放的时候
+	- target被释放的时候
+	- 调用`[observer unobserve:PACK(target, keyPath)]`的时候
+* `[PACK(sender, keyPath) post:block]`会在以下情况中释放block:
+	- sender被释放的时候
+	- 调用`[PACK(sender, keyPath) stop]`的时候
+
+举个栗子：如果你打算观察一个单例对象的属性变化时，建议使用“观察模式”而非“广播模式”。
+
+* 使用了“观察模式” － 由于观察者不会被它的目标对象强引用持有，因此可以随时被释放。当观察者被释放的时候，block就被自动释放了。就像上面介绍过的只有相应的树形分支会被释放。
+* 使用了“广播模式” － 如果你打算释放post的block，就需要手动调用`[PACK(singleton, property) stop]`，结果有可能就释放了所有树形结构中包含该keyPath的block，导致其它地方的代码中需要观察变化的对象无法继续接收结果了。
 
 <br>
 

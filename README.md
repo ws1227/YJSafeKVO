@@ -65,6 +65,8 @@ Reading this is much natural semantically, or you can simply using `PACK` macro.
 }];
 ```
 
+A is considered as "Observer", or "Subscriber". B is considered as observed "Target".
+
 <br>
 
 #### Subscribing
@@ -136,16 +138,6 @@ Posting value changes directly.
 ```
 
 The foo is consider as a sender, when foo's name sets new value, it sends changes to the block.
-
-The difference between using `-observe:updates:` and `post:` is:
-
-* `[subscriber observe:PACK(target, keyPath) updates:block]` will release block when: 
-	- subscriber is deallocated.
-	- target is deallocated.
-	- manually call `[subscriber unobserve:PACK(target, keyPath)]`
-* `[PACK(sender, keyPath) post:block]` will release block when:
-	- sender is deallocated.
-	- manually call `[PACK(sender, keyPath) stop]`
 
 <br>
 
@@ -219,6 +211,16 @@ The object managing the subscribers. It usually owned by target. Unlike porter m
 
 <br>
 
+#### Consequence
+
+If target or sender is deallocated, the graph tree is gone. If one of subscribers is deallocated before target, only that branch of the graph tree is gone.
+
+If you want to stop observation when you finish observing before any of them is deallocated, you can manually call `-unobserve..`, `-cutOff:` or `-stop` to stop observing. 
+
+<br>
+
+### Tips
+
 #### Avoid retain cycle
 
 It easily to cause retain cycle by using block.
@@ -241,15 +243,7 @@ By the way, `-post:` method doesn't contains much parameters in its block. Be ca
 
 <br>
 
-#### Consequence
-
-If target or sender is deallocated, the graph tree is gone. If one of subscribers is deallocated before target, only that branch of the graph tree is gone.
-
-If you want to stop observation when you finish observing before any of them is deallocated, you can manually call `-unobserve..`, `-cutOff:` or `-stop` to stop observing. 
-
-<br>
-
-#### What about the case when multiple threads are involved ?
+#### Deal with threads
 
 For example if your observed property is being set with new value on one thread, and you expect to update UI with new value in the callback block executed on main thread. You can use the extended API for specifing a `NSOperationQueue` parameter.
 
@@ -263,6 +257,25 @@ For example if your observed property is being set with new value on one thread,
 ```
 
 If you are familiar with `-addObserverForName:object:queue:usingBlock:` for `NSNotificationCenter`, then there is no barrier for using this API.
+
+<br>
+
+#### "Observing" or "Broadcasting" ?
+
+The difference between `Observing` and `Broadcasting` is:
+
+* `[subscriber observe:PACK(target, keyPath) updates:block]` will release block when: 
+	- subscriber is deallocated.
+	- target is deallocated.
+	- manually call `[subscriber unobserve:PACK(target, keyPath)]`
+* `[PACK(sender, keyPath) post:block]` will release block when:
+	- sender is deallocated.
+	- manually call `[PACK(sender, keyPath) stop]`
+
+Here is a concrete example: If you want to observe the property value changes from a global singleton object, it is better using "Observing" pattern rather than "Broadcasting". 
+
+* Use "Observing" - Subscriber can be release anytime because it's not being strongly holded by it's target. When the subscriber is deallocated, it automatically handle the releasing work. It will only release the subscriber's branch.
+* Use "Broadcasting" - If you want to release the post block, you need to manually stop posting by calling `[PACK(singleton, property) stop]`. This action will release the whole keyPath's observation and it might affecting other places in code where objects still want to observe its value changes.
 
 <br>
 

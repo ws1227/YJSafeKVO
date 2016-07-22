@@ -260,9 +260,13 @@ If you are familiar with `-addObserverForName:object:queue:usingBlock:` for `NSN
 
 <br>
 
-#### "Observing" or "Broadcasting" ?
+#### Allodoxaphobia: "Observing", "Subscribing" or "Broadcasting" ???
 
-The difference between `Observing` and `Broadcasting` is:
+There is not much differences between "Observing" and "Subscribing" because they share the same graph tree. The "Observing" is treated as "Omnipotent Pattern" in `YJSafeKVO` because whatever any other patterns can do, "Observing" can do as well.
+
+The reason for using "Subscribing" is for the idea that you want one state is completely binded and decided by other states, so it will change value automatically rather than manually set by developer.
+
+The difference between "Observing" and "Broadcasting" is:
 
 * `[subscriber observe:PACK(target, keyPath) updates:block]` will release block when: 
 	- subscriber is deallocated.

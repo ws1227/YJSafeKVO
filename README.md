@@ -262,7 +262,18 @@ If you are familiar with `-addObserverForName:object:queue:usingBlock:` for `NSN
 
 #### Allodoxaphobia: "Observing", "Subscribing" or "Broadcasting" ???
 
-There is not much differences between "Observing" and "Subscribing" because they share the same graph tree. The "Observing" is treated as "Omnipotent Pattern" in `YJSafeKVO` because whatever any other patterns can do, "Observing" can do as well.
+There is not much differences between "Observing" and "Subscribing" because they share the same graph tree. The "Observing" is treated as "Omnipotent Pattern" in `YJSafeKVO` because whatever any other patterns can do, "Observing" can do as well. Here is an example for a view controller observing network conntection status and make a batch of changes when status is changed.
+
+```
+[self observe:PACK(reachability, networkReachabilityStatus) updates:^(MyViewController *self, AFNetworkReachabilityManager *reachability, NSValue *newValue) {
+    AFNetworkReachabilityStatus status = [newValue integerValue];
+    BOOL connected = (status == AFNetworkReachabilityStatusReachableViaWWAN || status == AFNetworkReachabilityStatusReachableViaWiFi);
+    self.label.text = connected ? @"Conntected" : @"Disconnected";
+    self.button.enable = connected;
+    self.view.backgroundColor = connected ? UIColor.whiteColor : UIColor.grayColor;
+    ...
+}];
+```
 
 The reason for using "Subscribing" is for the idea that you want one state is completely binded and decided by other states, so it will change value automatically rather than manually set by developer.
 

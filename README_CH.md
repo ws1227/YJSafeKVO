@@ -261,7 +261,18 @@ Porter1    Porter2     Porter3  ...         Porter4      ...
 
 #### 选择困难症：观察模式？订阅模式？还是广播模式？？？
 
-“观察模式”和“订阅模式”之间基本没有什么区别，毕竟二者都是共享一个树形结构。“观察模式”在`YJSafeKVO`中可以被看作为是“万能模式”，因为其它模式能做到的，它一定都能做到。
+“观察模式”和“订阅模式”之间基本没有什么区别，毕竟二者都是共享一个树形结构。“观察模式”在`YJSafeKVO`中可以被看作为是“万能模式”，因为其它模式能做到的，它一定都能做到。比如这里展示了如何实现一个view controller时刻观察网络连接状态的变化，并且做出一系列相应的情况。
+
+```
+[self observe:PACK(reachability, networkReachabilityStatus) updates:^(MyViewController *self, AFNetworkReachabilityManager *reachability, NSValue *newValue) {
+    AFNetworkReachabilityStatus status = [newValue integerValue];
+    BOOL connected = (status == AFNetworkReachabilityStatusReachableViaWWAN || status == AFNetworkReachabilityStatusReachableViaWiFi);
+    self.label.text = connected ? @"Conntected" : @"Disconnected";
+    self.button.enable = connected;
+    self.view.backgroundColor = connected ? UIColor.whiteColor : UIColor.grayColor;
+    ...
+}];
+```
 
 “订阅模式”的衍生是为了实现一个概念：一个状态的变化只能由其它的状态来决定。这样该状态的变化就会自动随着其它状态的改变而改变，而不是通过开发者手动设置。
 

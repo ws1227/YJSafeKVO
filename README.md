@@ -123,7 +123,7 @@ However, if your final result is determined by more than one changing factor, yo
 }];
 ```
 
-It also supports `-cutOff:` for cutting off the relationship between subscriber's key path and target's key path after using `-bound:` or `-piped:`.
+`Subscribing` pattern also supports `-cutOff:` for cutting off the relationship between subscriber's key path and target's key path after using `-bound:` or `-piped:`.
 
 <br>
 
@@ -137,7 +137,7 @@ Posting value changes directly.
 }];
 ```
 
-The foo is consider as a sender, when foo's name sets new value, it sends changes to the block.
+The foo is consider as a sender, when foo's name sets new value, it sends changes to the block. Also calling `[PACK(foo, name) stop]` to stop posting value changes.
 
 <br>
 

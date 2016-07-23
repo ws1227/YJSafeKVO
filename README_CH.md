@@ -123,7 +123,7 @@ Context: 0x0'
 }];
 ```
 
-它还支持通过调用`-cutOff:`来斩断已建立的绑定关系。
+`订阅模式`还支持通过调用`-cutOff:`来斩断已建立的绑定关系。
 
 <br>
 
@@ -137,7 +137,7 @@ Context: 0x0'
 }];
 ```
 
-这里的foo被看作是发布者(sender)，当foo的name有改动时，就会调用block。
+这里的foo被看作是发布者(sender)，当foo的name有改动时，就会调用block。通过调用`[PACK(foo, name) stop]`来停止发布更新。
 
 <br>
 
@@ -230,7 +230,7 @@ Porter1    Porter2     Porter3  ...         Porter4      ...
 }];
 ```
 
-解决方法：将block中的变量`receiver`替换成`self`即可，这里不需要再定义`__weak`了。
+解决方法：将block的默认参数变量从`receiver`替换成`self`即可，这里不需要再定义`__weak`了。
 
 ```
 [self observe:PACK(self.foo, name) updates:^(id self, id foo, id _Nullable newName) {
@@ -261,7 +261,7 @@ Porter1    Porter2     Porter3  ...         Porter4      ...
 
 #### 选择困难症：观察模式？订阅模式？还是广播模式？？？
 
-“观察模式”和“订阅模式”之间基本没有什么区别，毕竟二者都是共享一个树形结构。“观察模式”在`YJSafeKVO`中可以被看作为是“万能模式”，因为其它模式能做到的，它一定都能做到。比如这里展示了如何实现一个view controller时刻观察网络连接状态的变化，并且做出一系列相应的情况。
+“观察模式”和“订阅模式”之间基本没有什么区别，毕竟二者都是共享一个树形结构。“观察模式”在`YJSafeKVO`中可以被看作为是“万能模式”，因为其它模式能做到的，它一定都能做到。比如这里展示了如何实现一个view controller时刻观察网络连接状态的变化，并且做出一系列响应的情况。
 
 ```
 [self observe:PACK(reachability, networkReachabilityStatus) updates:^(MyViewController *self, AFNetworkReachabilityManager *reachability, NSValue *newValue) {
@@ -289,7 +289,7 @@ Porter1    Porter2     Porter3  ...         Porter4      ...
 举个栗子：如果你打算观察一个单例对象的属性变化时，建议使用“观察模式”而非“广播模式”。
 
 * 使用了“观察模式”的话 － 由于订阅者不会被它的目标对象强引用持有，因此可以随时被释放。当订阅者被释放的时候，block就被自动释放了。就像上面介绍过的只有相应的树形分支会被释放。
-* 使用了“广播模式”的话 － 如果你打算释放post的block，就需要手动调用`[PACK(singleton, property) stop]`，结果有可能就释放了所有树形结构中包含该keyPath的block，导致其它地方的代码中需要观察变化的对象无法继续接收结果了。
+* 使用了“广播模式”的话 － 如果你打算释放post的block，就需要手动调用`[PACK(singleton, property) stop]`，结果有可能就释放了所有树形结构中包含该keyPath的block，导致其它地方的代码中仍然需要观察这个keyPath变化的对象无法继续接收结果了。
 
 <br>
 

@@ -54,7 +54,7 @@
 @end
 
 
-@implementation YJKVOPacker (YJKVOBinding)
+@implementation YJKVOPacker (YJKVOSubscribing)
 
 - (void)bound:(PACK)targetAndKeyPath {
     [self _pipedFrom:targetAndKeyPath options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew];
@@ -190,7 +190,7 @@ id _YJKVO_retrieveTarget(NSArray *targets, NSString *variableName) {
     }
 }
 
-- (void)stop {
+- (void)stopPosting {
     if (self.isValid) {
         __kindof NSObject *sender = self.object;
         __kindof NSObject *keyPath = self.keyPath;
@@ -199,6 +199,10 @@ id _YJKVO_retrieveTarget(NSArray *targets, NSString *variableName) {
             [[_YJKVOExecutiveOfficer officer] dismissSender:sender forKeyPath:keyPath];
         }
     }
+}
+
+- (void)stop {
+    [self stopPosting];
 }
 
 @end

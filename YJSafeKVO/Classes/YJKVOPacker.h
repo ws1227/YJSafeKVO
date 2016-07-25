@@ -61,10 +61,10 @@ typedef YJKVOPacker * PACK;
 
 
 /* --------------------------------------------------------------------------------------------- */
-//                                            binding
+//                                          Subscribing
 /* --------------------------------------------------------------------------------------------- */
 
-@interface YJKVOPacker (YJKVOBinding)
+@interface YJKVOPacker (YJKVOSubscribing)
 
 
 /**
@@ -150,7 +150,9 @@ typedef YJKVOPacker * PACK;
  @brief Stop posting the value changes.
  @discussion After calling this, the post block will be released.
  */
-- (void)stop;
+- (void)stopPosting;
+
+- (void)stop DEPRECATED_MSG_ATTRIBUTE("Deprecated. Use stopPosting instead.");
 
 @end
 

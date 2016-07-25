@@ -38,22 +38,23 @@ YJKVOChangeHandler (^yj_convertedKVOChangeHandler)(YJKVOObjectsAndValueHandler) 
     
     NSMutableArray *targets = [NSMutableArray arrayWithCapacity:targetsAndKeyPaths.count];
     for (PACK targetAndKeyPath in targetsAndKeyPaths) {
-        if (targetAndKeyPath.isValid) {
-            [targets addObject:targetAndKeyPath.object];
-        }
+        if (!targetAndKeyPath.isValid) return;
+        [targets addObject:targetAndKeyPath.object];
     }
     
     for (PACK targetAndKeyPath in targetsAndKeyPaths) {
-        if (targetAndKeyPath.isValid) {
-            
-            _YJKVOGroupingPorter *porter = [[_YJKVOGroupingPorter alloc] initWithTarget:targetAndKeyPath.object
-                                                                             subscriber:self
-                                                                          targetKeyPath:targetAndKeyPath.keyPath];
-            porter.targetsHandler = updates;
-            [porter associateWithGroupTarget:targets];
-            
-            [[_YJKVOExecutiveOfficer officer] organizeTarget:targetAndKeyPath subscriber:self porter:porter];
-        }
+        
+        __kindof NSObject *target = targetAndKeyPath.object;
+        __kindof NSObject *subscriber = self;
+        NSString *targetKeyPath = targetAndKeyPath.keyPath;
+        
+        _YJKVOGroupingPorter *porter = [[_YJKVOGroupingPorter alloc] initWithTarget:target
+                                                                         subscriber:subscriber
+                                                                      targetKeyPath:targetKeyPath];
+        porter.targetsHandler = updates;
+        [porter associateWithGroupTarget:targets];
+        
+        [[_YJKVOExecutiveOfficer officer] organizeTarget:target subscriber:subscriber porter:porter];
     }
 }
 

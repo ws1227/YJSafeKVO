@@ -49,8 +49,8 @@
         if (newValue == [NSNull null]) newValue = nil;
         if (self.changeHandler && self.subscriber) {
             self.changeHandler(self.subscriber, object, newValue, change);
-        } else if (self.valueHandler) {
-            self.valueHandler(newValue);
+        } else if (self.valueHandler && self.subscriber) {
+            self.valueHandler(self.subscriber, newValue);
         }
     };
     

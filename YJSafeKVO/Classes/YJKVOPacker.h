@@ -27,7 +27,10 @@ id _YJKVO_retrieveTarget(NSArray *targets, NSString *variableName);
 #endif
 
 #define PACK(OBJECT, KEYPATH) \
-    [YJKVOPacker packerWithObject:OBJECT keyPath:_OBJECTIFY_KEYPATH(OBJECT, KEYPATH) variableName:_STRINGIFY_VARIABLE(OBJECT)]
+    [YJKVOPacker packerWithObject:OBJECT \
+                          keyPath:_OBJECTIFY_KEYPATH(OBJECT, KEYPATH) \
+                     variableName:_STRINGIFY_VARIABLE(OBJECT) \
+               implicitSubscriber:self]
 
 #define UNPACK(CLASS, TARGET) \
     CLASS *TARGET = _YJKVO_retrieveTarget(targets, _STRINGIFY_VARIABLE(TARGET));
@@ -51,10 +54,11 @@ typedef YJKVOPacker * PACK;
 + (instancetype)packerWithObject:(__kindof NSObject *)object
                          keyPath:(NSString *)keyPath
                     variableName:(nullable NSString *)variableName
+              implicitSubscriber:(nullable __kindof NSObject *)implicitSubscriber
                         NS_SWIFT_UNAVAILABLE("Use init(_:_:) instead.");
 
 @property (nonatomic, readonly, strong) __kindof NSObject *object;
-@property (nonatomic, readonly, strong) NSString *keyPath;
+@property (nonatomic, readonly, copy) NSString *keyPath;
 @property (nonatomic, readonly) BOOL isValid;
 
 @end
@@ -144,13 +148,13 @@ typedef YJKVOPacker * PACK;
  @brief Post the value changes from sender's key path.
  @param The post block will be called immediately and for each time when new value is being set.
  */
-- (void)post:(void(^)(id _Nullable newValue))post;
+- (void)post:(void(^)(id self, id _Nullable newValue))post NS_SWIFT_UNAVAILABLE("Use observe() instead.");
 
 /**
  @brief Stop posting the value changes.
  @discussion After calling this, the post block will be released.
  */
-- (void)stopPosting;
+- (void)stopPosting NS_SWIFT_UNAVAILABLE("Use observe() and unobserve() instead.");
 
 - (void)stop DEPRECATED_MSG_ATTRIBUTE("Deprecated. Use stopPosting instead.");
 

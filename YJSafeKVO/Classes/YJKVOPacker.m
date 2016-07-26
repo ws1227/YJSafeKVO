@@ -16,8 +16,9 @@
 
 @interface YJKVOPacker ()
 @property (nonatomic, strong) __kindof NSObject *object;
-@property (nonatomic, strong) NSString *keyPath;
-@property (nonatomic, weak) _YJKVOBindingPorter *bindingPorter;
+@property (nonatomic, copy) NSString *keyPath;
+@property (nullable, nonatomic, assign) _YJKVOBindingPorter *bindingPorter;
+@property (nullable, nonatomic, assign) __kindof NSObject *implicitSubscriber;
 @end
 
 @implementation YJKVOPacker
@@ -26,7 +27,7 @@
     self = [super init];
     if (self) {
         _object = object;
-        _keyPath = keyPath;
+        _keyPath = [keyPath copy];
     }
     return self;
 }
@@ -38,10 +39,13 @@
 
 + (instancetype)packerWithObject:(__kindof NSObject *)object
                          keyPath:(NSString *)keyPath
-                    variableName:(nullable NSString *)variableName {
+                    variableName:(nullable NSString *)variableName
+              implicitSubscriber:(nullable __kindof NSObject *)implicitSubscriber {
     
     object.yj_KVOVariableName = variableName;
-    return [[self alloc] initWithObject:object keyPath:keyPath];
+    __kindof YJKVOPacker *packer = [[self alloc] initWithObject:object keyPath:keyPath];
+    packer.implicitSubscriber = implicitSubscriber;
+    return packer;
 }
 
 - (BOOL)isValid {
@@ -67,6 +71,7 @@
 
 - (void)ready {
     [self.object setValue:[self.object valueForKeyPath:self.keyPath] forKeyPath:self.keyPath];
+    self.bindingPorter = nil;
 }
 
 - (void)_pipedFrom:(PACK)targetAndKeyPath options:(NSKeyValueObservingOptions)options {
@@ -178,27 +183,29 @@ id _YJKVO_retrieveTarget(NSArray *targets, NSString *variableName) {
 
 @implementation YJKVOPacker (YJKVOPosting)
 
-- (void)post:(void (^)(id _Nullable))post {
+- (void)post:(void (^)(id self, id _Nullable))post {
     if (self.isValid) {
-        __kindof NSObject *sender = self.object;
-        __kindof NSObject *keyPath = self.keyPath;
+        __kindof NSObject *target = self.object;
+        __kindof NSObject *subscriber = self.implicitSubscriber;
+        NSString *keyPath = self.keyPath;
         
-        _YJKVOPorter *porter = [[_YJKVOPorter alloc] initWithTarget:sender subscriber:nil targetKeyPath:keyPath];
+        _YJKVOPorter *porter = [[_YJKVOPorter alloc] initWithTarget:target subscriber:subscriber targetKeyPath:keyPath];
         porter.valueHandler = post;
         
-        [[_YJKVOExecutiveOfficer officer] organizeSender:sender porter:porter];
+        [[_YJKVOExecutiveOfficer officer] organizeTarget:target subscriber:subscriber porter:porter];
     }
+    self.implicitSubscriber = nil;
 }
 
 - (void)stopPosting {
     if (self.isValid) {
-        __kindof NSObject *sender = self.object;
-        __kindof NSObject *keyPath = self.keyPath;
+        __kindof NSObject *target = self.object;
+        __kindof NSObject *subscriber = self.implicitSubscriber;
+        NSString *keyPath = self.keyPath;
         
-        if (sender.yj_KVOPorterManager) {
-            [[_YJKVOExecutiveOfficer officer] dismissSender:sender forKeyPath:keyPath];
-        }
+        [[_YJKVOExecutiveOfficer officer] dismissPortersFromTarget:target andSubscriber:subscriber forTargetKeyPath:keyPath];
     }
+    self.implicitSubscriber = nil;
 }
 
 - (void)stop {

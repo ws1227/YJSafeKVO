@@ -18,12 +18,8 @@ NS_ASSUME_NONNULL_BEGIN
 __attribute__((visibility("hidden")))
 @interface _YJKVOExecutiveOfficer : NSObject
 
-/* ------------------------------------------------------------ */
-
 /// singleton object
 + (instancetype)officer;
-
-/* ------------------------------------------------------------ */
 
 /// register KVO and organize all related objects into KVO chain.
 - (void)organizeTarget:(__kindof NSObject *)target
@@ -47,18 +43,6 @@ __attribute__((visibility("hidden")))
 /// dismiss specified subscriber from KVO chain.
 - (void)dismissSubscriber:(__kindof NSObject *)subscriber;
 
-/* ------------------------------------------------------------ */
-
-/// register KVO and organize all related objects into KVO chain.
-- (void)organizeSender:(__kindof NSObject *)sender
-                porter:(__kindof _YJKVOPorter *)porter;
-
-/// dismiss specified target from KVO chain.
-- (void)dismissSender:(__kindof NSObject *)sender;
-
-/// dismiss related porters from KVO chain.
-- (void)dismissSender:(__kindof NSObject *)sender
-           forKeyPath:(NSString *)keyPath;
 
 @end
 

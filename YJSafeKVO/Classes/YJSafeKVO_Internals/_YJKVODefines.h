@@ -11,16 +11,16 @@
 
 #define YJ_KVO_DEBUG 0
 
-typedef void(^YJKVOChangeHandler)(id receiver, id target, id newValue, NSDictionary *change);
+typedef void(^YJKVODefaultChangeHandler)(id receiver, id target, id newValue, NSDictionary *change);
 
-typedef void(^YJKVOTargetsHandler)(id receiver, NSArray *targets);
-typedef id(^YJKVOTargetsReturnHandler)(id receiver, NSArray *targets);
+typedef void(^YJKVOReceiverTargetsHandler)(id receiver, NSArray *targets);
+typedef id(^YJKVOReceiverTargetsReturnHandler)(id receiver, NSArray *targets);
 
-typedef void(^YJKVOObjectsAndValueHandler)(id subscriber, id target, id newValue);
-typedef id(^YJKVOObjectsAndValueReturnHandler)(id subscriber, id target, id newValue);
+typedef void(^YJKVOSubscriberTargetValueHandler)(id subscriber, id target, id newValue);
+typedef id(^YJKVOSubscriberTargetValueReturnHandler)(id subscriber, id target, id newValue);
 
-typedef void(^YJKVOObjectsHandler)(id subscriber, id target);
+typedef void(^YJKVOSubscriberTargetHandler)(id subscriber, id target);
 
-typedef void(^YJKVOValueHandler)(id newValue);
+typedef void(^YJKVOSubscriberValueHandler)(id subscriber, id newValue);
 
 #endif /* _YJKVODefines_h */

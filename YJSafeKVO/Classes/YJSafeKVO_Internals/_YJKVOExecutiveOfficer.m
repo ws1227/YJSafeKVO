@@ -70,23 +70,6 @@
     }];
 }
 
-- (void)organizeSender:(__kindof NSObject *)sender
-                porter:(__kindof _YJKVOPorter *)porter {
-    
-    [porter signUp];
-    
-    _YJKVOPorterManager *porterManager = sender.yj_KVOPorterManager;
-    if (!porterManager) {
-        porterManager = [[_YJKVOPorterManager alloc] initWithOwner:sender];
-        sender.yj_KVOPorterManager = porterManager;
-    }
-    [porterManager addPorter:porter];
-    
-    [sender performBlockBeforeDeallocating:^(__kindof NSObject *sender) {
-        [self dismissSender:sender];
-    }];
-}
-
 - (void)dismissTarget:(__kindof NSObject *)target {
     @autoreleasepool {
         [target.yj_KVOSubscriberManager enumerateSubscribersUsingBlock:^(__kindof NSObject * _Nonnull subscriber, BOOL * _Nonnull stop) {
@@ -178,6 +161,25 @@
             [subscriberManager removeSubscriber:subscriber];
         }
     }
+}
+
+/* ------------------------ DEPRECATES ------------------------ */
+
+- (void)organizeSender:(__kindof NSObject *)sender
+                porter:(__kindof _YJKVOPorter *)porter {
+    
+    [porter signUp];
+    
+    _YJKVOPorterManager *porterManager = sender.yj_KVOPorterManager;
+    if (!porterManager) {
+        porterManager = [[_YJKVOPorterManager alloc] initWithOwner:sender];
+        sender.yj_KVOPorterManager = porterManager;
+    }
+    [porterManager addPorter:porter];
+    
+    [sender performBlockBeforeDeallocating:^(__kindof NSObject *sender) {
+        [self dismissSender:sender];
+    }];
 }
 
 - (void)dismissSender:(__kindof NSObject *)sender {

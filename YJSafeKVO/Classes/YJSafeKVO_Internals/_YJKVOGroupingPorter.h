@@ -22,10 +22,10 @@ __attribute__((visibility("hidden")))
 @property (nullable, nonatomic, copy) NSString *subscriberKeyPath;
 
 /// The value change callback block.
-@property (nullable, nonatomic, copy) YJKVOTargetsHandler targetsHandler;
+@property (nullable, nonatomic, copy) YJKVOReceiverTargetsHandler targetsHandler;
 
 /// The value change callback block which only for converting changes.
-@property (nullable, nonatomic, copy) YJKVOTargetsReturnHandler targetsReturnHandler;
+@property (nullable, nonatomic, copy) YJKVOReceiverTargetsReturnHandler targetsReturnHandler;
 
 @end
 

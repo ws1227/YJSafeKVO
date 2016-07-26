@@ -27,13 +27,13 @@ __attribute__((visibility("hidden")))
 @property (nonatomic, readonly, copy) NSString *subscriberKeyPath;
 
 /// The value change callback block which only for converting changes.
-@property (nonatomic, copy) YJKVOObjectsAndValueReturnHandler convertHandler;
+@property (nonatomic, copy) YJKVOSubscriberTargetValueReturnHandler convertHandler;
 
 /// The value change callback block which only for filtering changes.
 @property (nonatomic, copy) YJKVOValueTakenHandler takenHandler;
 
 /// The value change callback block which only called after applying changes.
-@property (nonatomic, copy) YJKVOObjectsHandler afterHandler;
+@property (nonatomic, copy) YJKVOSubscriberTargetHandler afterHandler;
 
 @end
 

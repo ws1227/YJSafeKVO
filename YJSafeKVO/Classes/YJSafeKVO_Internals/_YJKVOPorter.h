@@ -43,10 +43,10 @@ __attribute__((visibility("hidden")))
 @property (nullable, nonatomic, strong) NSOperationQueue *queue;
 
 /// The default handler for handling the value changes.
-@property (nullable, nonatomic, copy) YJKVOChangeHandler changeHandler;
+@property (nullable, nonatomic, copy) YJKVODefaultChangeHandler changeHandler;
 
 /// The value handler for handling value changes.
-@property (nullable, nonatomic, copy) YJKVOValueHandler valueHandler;
+@property (nullable, nonatomic, copy) YJKVOSubscriberValueHandler valueHandler;
 
 @end
 

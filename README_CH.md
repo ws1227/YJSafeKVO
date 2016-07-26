@@ -43,7 +43,7 @@ Context: 0x0'
 
 * 观察模式
 * 订阅模式
-* 广播模式
+* 发布模式
 
 <br>
 
@@ -127,12 +127,12 @@ Context: 0x0'
 
 <br>
 
-#### 广播模式
+#### 发布模式
 
-广播模式可以直接对外发布键值的更新。
+发布模式可以直接对外发布键值的更新。
 
 ```
-[PACK(foo, name) post:^(NSString *name) {
+[PACK(foo, name) post:^(id self, NSString *name) {
     NSLog(@"foo has changed a new name: %@.", name);
 }];
 ```
@@ -153,7 +153,7 @@ Context: 0x0'
 
 #### 结构图
 
-这张图大致描绘了`观察模式`和`订阅模式`的树型结构
+这张图大致描绘了`YJSafeKVO`的树型结构
 
 ```
                                Target
@@ -171,19 +171,6 @@ Porter1    Porter2     Porter3  ...         Porter4      ...
 
 ```
 
-这张图描绘了`广播模式`的树型结构。
-
-```
-                                Sender
-                                  |
-                            Porter Manager
-                                  |
-              |-------------------|------------------|
-           Porter1             Porter2            Porter3   ...
-              |                   |                  |
-           (block)             (block)            (block)
-
-```
 <br>
 
 #### 角色
@@ -238,8 +225,6 @@ Porter1    Porter2     Porter3  ...         Porter4      ...
 }];
 ```
 
-顺便提一句，`-post:`方法的block中没有提供这样的参数，使用需注意。
-
 <br>
 
 #### 处理线程问题
@@ -259,9 +244,9 @@ Porter1    Porter2     Porter3  ...         Porter4      ...
 
 <br>
 
-#### 选择困难症：观察模式？订阅模式？还是广播模式？？？
+#### 选择困难症：观察模式？订阅模式？还是发布模式？？？
 
-“观察模式”和“订阅模式”之间基本没有什么区别，毕竟二者都是共享一个树形结构。“观察模式”在`YJSafeKVO`中可以被看作为是“万能模式”，因为其它模式能做到的，它一定都能做到。比如这里展示了如何实现一个view controller时刻观察网络连接状态的变化，并且做出一系列响应的情况。
+“观察模式”和“发布模式”之间基本没有什么区别，毕竟二者都是共享一个树形结构。“观察模式”在`YJSafeKVO`中可以被看作为是“万能模式”，因为其它模式能做到的，它一定都能做到。比如这里展示了如何实现一个view controller时刻观察网络连接状态的变化，并且做出一系列响应的情况。
 
 ```
 [self observe:PACK(reachability, networkReachabilityStatus) updates:^(MyViewController *self, AFNetworkReachabilityManager *reachability, NSValue *newValue) {
@@ -275,21 +260,6 @@ Porter1    Porter2     Porter3  ...         Porter4      ...
 ```
 
 “订阅模式”的衍生是为了实现一个概念：一个状态的变化只能由其它的状态来决定。这样该状态的变化就会自动随着其它状态的改变而改变，而不是通过开发者手动设置。
-
-简单说明下`观察模式`和`广播模式`的区别：
-
-* `[subscriber observe:PACK(target, keyPath) updates:block]`会在以下情况中释放block: 
-	- subscriber被释放的时候
-	- target被释放的时候
-	- 调用`[subscriber unobserve:PACK(target, keyPath)]`的时候
-* `[PACK(sender, keyPath) post:block]`会在以下情况中释放block:
-	- sender被释放的时候
-	- 调用`[PACK(sender, keyPath) stop]`的时候
-
-举个栗子：如果你打算观察一个单例对象的属性变化时，建议使用“观察模式”而非“广播模式”。
-
-* 使用了“观察模式”的话 － 由于订阅者不会被它的目标对象强引用持有，因此可以随时被释放。当订阅者被释放的时候，block就被自动释放了。就像上面介绍过的只有相应的树形分支会被释放。
-* 使用了“广播模式”的话 － 如果你打算释放post的block，就需要手动调用`[PACK(singleton, property) stop]`，结果有可能就释放了所有树形结构中包含该keyPath的block，导致其它地方的代码中仍然需要观察这个keyPath变化的对象无法继续接收结果了。
 
 <br>
 
@@ -340,16 +310,6 @@ PACK(foo, "name").piped(PACK(bar, "name"))
     
 bar.name = "Bar" // foo.name is not receiving "Bar"
 bar.name = "Barrrr" // foo.name is "BARRRR" 
-```
-
-广播模式:
-
-```
-PACK(foo, "name").post { (newValue) in
-    if let name = newValue as? String {
-        print("new name: \(name)")
-    }
-}
 ```
 
 <br>

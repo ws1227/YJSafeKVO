@@ -43,7 +43,7 @@ Despite the usability and safefy from default APIs, KVO is still important. As a
 
 * Observing
 * Subscribing
-* Broadcasting
+* Posting
 
 <br>
 
@@ -127,12 +127,12 @@ However, if your final result is determined by more than one changing factor, yo
 
 <br>
 
-#### Broadcasting
+#### Posting
 
 Posting value changes directly.
 
 ```
-[PACK(foo, name) post:^(NSString *name) {
+[PACK(foo, name) post:^(id self, NSString *name) {
     NSLog(@"foo has changed a new name: %@.", name);
 }];
 ```
@@ -153,7 +153,7 @@ No! No extra work is required. Choose the pattern you like, and `YJSafeKVO` take
 
 #### Graph
 
-Here is a graph showing `Observing` or `Subscribing`.
+Here is a graph tree showing `YJSafeKVO`.
 
 ```
                                Target
@@ -168,20 +168,6 @@ Here is a graph showing `Observing` or `Subscribing`.
 Porter1    Porter2     Porter3  ...         Porter4      ...
    |          |           |                    |
 (block)    (block)     (block)              (block)
-
-```
-
-Here is a graph showing `Broadcasting`.
-
-```
-                                Sender
-                                  |
-                            Porter Manager
-                                  |
-              |-------------------|------------------|
-           Porter1             Porter2            Porter3   ...
-              |                   |                  |
-           (block)             (block)            (block)
 
 ```
 
@@ -239,8 +225,6 @@ To solve the issue: change `receiver` variable to `self`. No need extra `__weak`
 }];
 ```
 
-By the way, `-post:` method doesn't contains much parameters in its block. Be careful.
-
 <br>
 
 #### Deal with threads
@@ -260,9 +244,9 @@ If you are familiar with `-addObserverForName:object:queue:usingBlock:` for `NSN
 
 <br>
 
-#### Allodoxaphobia: "Observing", "Subscribing" or "Broadcasting" ???
+#### Allodoxaphobia: "Observing", "Subscribing" or "Posting" ???
 
-There is not much differences between "Observing" and "Subscribing" because they share the same graph tree. The "Observing" is treated as "Omnipotent Pattern" in `YJSafeKVO` because whatever any other patterns can do, "Observing" can do as well. Here is an example for a view controller observing network conntection status and make a batch of changes when status is changed.
+There is not much differences between "Observing" and "Posting" because they share the same graph tree. The "Observing" is treated as "Omnipotent Pattern" in `YJSafeKVO` because whatever any other patterns can do, "Observing" can do as well. Here is an example for a view controller observing network conntection status and make a batch of changes when status is changed.
 
 ```
 [self observe:PACK(reachability, networkReachabilityStatus) updates:^(MyViewController *self, AFNetworkReachabilityManager *reachability, NSValue *newValue) {
@@ -276,21 +260,6 @@ There is not much differences between "Observing" and "Subscribing" because they
 ```
 
 The reason for using "Subscribing" is for the idea that you want one state is completely binded and decided by other states, so it will change value automatically rather than manually set by developer.
-
-The difference between "Observing" and "Broadcasting" is:
-
-* `[subscriber observe:PACK(target, keyPath) updates:block]` will release block when: 
-	- subscriber is deallocated.
-	- target is deallocated.
-	- manually call `[subscriber unobserve:PACK(target, keyPath)]`
-* `[PACK(sender, keyPath) post:block]` will release block when:
-	- sender is deallocated.
-	- manually call `[PACK(sender, keyPath) stop]`
-
-Here is a concrete example: If you want to observe the property value changes from a global singleton object, it is better using "Observing" pattern rather than "Broadcasting". 
-
-* Use "Observing" - Subscriber can be release anytime because it's not being strongly holded by it's target. When the subscriber is deallocated, it automatically handle the releasing work. It will only release the subscriber's branch.
-* Use "Broadcasting" - If you want to release the post block, you need to manually stop posting by calling `[PACK(singleton, property) stop]`. This action will release the whole keyPath's observation and it might affecting other places in code where objects still want to observe its value changes.
 
 <br>
 
@@ -341,16 +310,6 @@ PACK(foo, "name").piped(PACK(bar, "name"))
     
 bar.name = "Bar" // foo.name is not receiving "Bar"
 bar.name = "Barrrr" // foo.name is "BARRRR" 
-```
-
-Broadcasting:
-
-```
-PACK(foo, "name").post { (newValue) in
-    if let name = newValue as? String {
-        print("new name: \(name)")
-    }
-}
 ```
 
 <br>

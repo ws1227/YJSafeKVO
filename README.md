@@ -111,15 +111,12 @@ or nesting them together.
 }] ready];
 ```
 
-However, if your final result is determined by more than one changing factor, you can use `flooded:`, which will take changes from multiple sources and reduce them into a single value.
+However, if your final result is determined by more than one changing factor, you can use `flooded:reduce:`, which will take changes from multiple sources and reduce them into a single value.
 
 ```
-[PACK(clown, name) flooded:@[ PACK(foo, name),
-                              PACK(bar, name) ] 
-                  converge:^id(id  _Nonnull observer, NSArray * _Nonnull targets) {
-    UNPACK(Foo, foo)
-    UNPACK(Bar, bar)
-    return [foo.name stringByAppendingString:bar.name];
+[PACK(clown, name) flooded:@[ PACK(foo, name), PACK(bar, name) ]
+							reduce:^id(NSString *fooName, NSString *barName) {
+    return fooName && barName ? [fooName stringByAppendingString:barName] : nil;
 }];
 ```
 

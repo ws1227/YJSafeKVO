@@ -17,9 +17,9 @@ __attribute__((visibility("hidden")))
 @interface _YJKVOPorter : NSObject
 
 /// The designated initializer
-- (instancetype)initWithTarget:(__kindof NSObject *)target
+- (instancetype)initWithTarget:(nullable __kindof NSObject *)target
                     subscriber:(nullable __kindof NSObject *)subscriber
-                 targetKeyPath:(NSString *)targetKeyPath NS_DESIGNATED_INITIALIZER;
+                 targetKeyPath:(nullable NSString *)targetKeyPath NS_DESIGNATED_INITIALIZER;
 
 /// Register KVO
 - (void)signUp;
@@ -27,14 +27,17 @@ __attribute__((visibility("hidden")))
 /// Unregister KVO
 - (void)resign;
 
+/// Check if porter is being registered.
+@property (nonatomic, readonly) BOOL employed;
+
 /// The KVO target.
-@property (nonatomic, readonly, assign) __kindof NSObject *target;
+@property (nullable, nonatomic, readonly, assign) __kindof NSObject *target;
 
 /// The KVO subscriber.
 @property (nullable, nonatomic, readonly, assign) __kindof NSObject *subscriber;
 
 /// The key path of target for observing.
-@property (nonatomic, readonly, copy) NSString *targetKeyPath;
+@property (nullable, nonatomic, readonly, copy) NSString *targetKeyPath;
 
 /// The key value observing options, default is (.initial | .new)
 @property (nonatomic) NSKeyValueObservingOptions observingOptions;

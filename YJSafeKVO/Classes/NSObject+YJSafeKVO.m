@@ -34,27 +34,25 @@ YJKVODefaultChangeHandler (^yj_convertedKVOChangeHandler)(YJKVOSubscriberTargetV
     }
 }
 
-- (void)observeGroup:(NSArray <PACK> *)targetsAndKeyPaths updates:(void(^)(id receiver, NSArray *targets))updates {
+- (void)observeGroup:(NSArray <PACK> *)targetsAndKeyPaths updates:(void(^)())updates {
+    if (!targetsAndKeyPaths.count)
+        return;
     
-    NSMutableArray *targets = [NSMutableArray arrayWithCapacity:targetsAndKeyPaths.count];
+    __kindof NSObject *subscriber = self;
+    
+    _YJKVOGroupingPorter *porter = [[_YJKVOGroupingPorter alloc] initWithSubscriber:subscriber];
+    porter.multipleValueHandler = updates;
+    
     for (PACK targetAndKeyPath in targetsAndKeyPaths) {
-        if (!targetAndKeyPath.isValid) return;
-        [targets addObject:targetAndKeyPath.object];
+        if (targetAndKeyPath.isValid) {
+            [porter addTarget:targetAndKeyPath.object keyPath:targetAndKeyPath.keyPath];
+        }
     }
     
     for (PACK targetAndKeyPath in targetsAndKeyPaths) {
-        
-        __kindof NSObject *target = targetAndKeyPath.object;
-        __kindof NSObject *subscriber = self;
-        NSString *targetKeyPath = targetAndKeyPath.keyPath;
-        
-        _YJKVOGroupingPorter *porter = [[_YJKVOGroupingPorter alloc] initWithTarget:target
-                                                                         subscriber:subscriber
-                                                                      targetKeyPath:targetKeyPath];
-        porter.targetsHandler = updates;
-        [porter associateWithGroupTarget:targets];
-        
-        [[_YJKVOExecutiveOfficer officer] organizeTarget:target subscriber:subscriber porter:porter];
+        if (targetAndKeyPath.isValid) {
+            [[_YJKVOExecutiveOfficer officer] organizeTarget:targetAndKeyPath.object subscriber:subscriber porter:porter];
+        }
     }
 }
 

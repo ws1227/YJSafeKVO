@@ -8,8 +8,7 @@
 
 #import "_YJKVOBindingPorter.h"
 #import "NSObject+YJKVOExtension.h"
-#import "_YJKVOPipeIDKeeper.h"
-#import "_YJKVOIdentifierGenerator.h"
+#import "_YJKVOPair.h"
 #import <objc/message.h>
 
 @implementation _YJKVOBindingPorter
@@ -36,29 +35,21 @@
     id newValue = change[NSKeyValueChangeNewKey];
     if (newValue == [NSNull null]) newValue = nil;
     
-    NSString *pipeID = [[_YJKVOIdentifierGenerator sharedGenerator] pipeIdentifierForTarget:object
-                                                                                 subscriber:self.subscriber
-                                                                              targetKeyPath:keyPath
-                                                                          subscriberKeyPath:self.subscriberKeyPath];
+    BOOL taken = YES;
+    if (self.takenHandler) {
+        taken = self.takenHandler(self.subscriber, object, newValue);
+    }
+    if (!taken) return;
     
-    if ([self.subscriber.yj_KVOPipeIDKeeper containsPipeIdentifier:pipeID]) {
-        
-        BOOL taken = YES;
-        if (self.takenHandler) {
-            taken = self.takenHandler(self.subscriber, object, newValue);
-        }
-        if (!taken) return;
-        
-        id convertedValue = newValue;
-        if (self.convertHandler) {
-            convertedValue = self.convertHandler(self.subscriber, object, newValue);
-        }
-        
-        [self.subscriber setValue:convertedValue forKeyPath:self.subscriberKeyPath];
-        
-        if (self.afterHandler) {
-            self.afterHandler(self.subscriber, object);
-        }
+    id convertedValue = newValue;
+    if (self.convertHandler) {
+        convertedValue = self.convertHandler(self.subscriber, object, newValue);
+    }
+    
+    [self.subscriber setValue:convertedValue forKeyPath:self.subscriberKeyPath];
+    
+    if (self.afterHandler) {
+        self.afterHandler(self.subscriber, object);
     }
 }
 

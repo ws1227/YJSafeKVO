@@ -11,8 +11,6 @@
 #import "_YJKVOExecutiveOfficer.h"
 #import "_YJKVOBindingPorter.h"
 #import "_YJKVOGroupingPorter.h"
-#import "_YJKVOPipeIDKeeper.h"
-#import "_YJKVOIdentifierGenerator.h"
 
 @interface YJKVOPacker ()
 @property (nonatomic, strong) __kindof NSObject *object;
@@ -39,12 +37,10 @@
 
 + (instancetype)packerWithObject:(__kindof NSObject *)object
                          keyPath:(NSString *)keyPath
-                    variableName:(nullable NSString *)variableName
-              implicitSubscriber:(nullable __kindof NSObject *)implicitSubscriber {
+                              on:(nullable __kindof NSObject *)on {
     
-    object.yj_KVOVariableName = variableName;
-    __kindof YJKVOPacker *packer = [[self alloc] initWithObject:object keyPath:keyPath];
-    packer.implicitSubscriber = implicitSubscriber;
+    YJKVOPacker *packer = [[self alloc] initWithObject:object keyPath:keyPath];
+    packer.implicitSubscriber = on;
     return packer;
 }
 
@@ -82,20 +78,6 @@
         NSString *targetKeyPath = targetAndKeyPath.keyPath;
         NSString *subscriberKeyPath = self.keyPath;
 
-        // generate pipe id
-        NSString *identifier = [[_YJKVOIdentifierGenerator sharedGenerator] pipeIdentifierForTarget:target
-                                                                                         subscriber:subscriber
-                                                                                      targetKeyPath:targetKeyPath
-                                                                                  subscriberKeyPath:subscriberKeyPath];
-        // keep pipe id
-        _YJKVOPipeIDKeeper *pipeIDKeeper = subscriber.yj_KVOPipeIDKeeper;
-        if (!pipeIDKeeper) {
-            pipeIDKeeper = [[_YJKVOPipeIDKeeper alloc] initWithSubscriber:subscriber];
-            subscriber.yj_KVOPipeIDKeeper = pipeIDKeeper;
-        }
-        [pipeIDKeeper addPipeIdentifier:identifier];
-        
-        // generate pipe porter
         _YJKVOBindingPorter *porter = [[_YJKVOBindingPorter alloc] initWithTarget:target
                                                                        subscriber:subscriber
                                                                     targetKeyPath:targetKeyPath
@@ -103,7 +85,6 @@
         porter.observingOptions = options;
         [targetAndKeyPath setBindingPorter:porter];
         
-        // register pipe porter
         [[_YJKVOExecutiveOfficer officer] organizeTarget:target subscriber:subscriber porter:porter];
     }
 }
@@ -123,32 +104,27 @@
     return self;
 }
 
-- (void)flooded:(NSArray <PACK> *)targetsAndKeyPaths converge:(id(^)(id subscriber, NSArray *targets))converge {
+- (void)flooded:(NSArray <PACK> *)targetsAndKeyPaths reduce:(nullable id(^)())reduce {
+    if (!self.isValid || !targetsAndKeyPaths.count)
+        return;
     
-    if (!self.isValid) return;
+    __kindof NSObject *subscriber = self.object;
+    NSString *subscriberKeyPath = self.keyPath;
     
-    NSMutableArray *targets = [NSMutableArray arrayWithCapacity:targetsAndKeyPaths.count];
+    _YJKVOGroupingPorter *porter = [[_YJKVOGroupingPorter alloc] initWithSubscriber:subscriber];
+    porter.subscriberKeyPath = subscriberKeyPath;
+    porter.reduceValueReturnHandler = reduce;
+    
     for (PACK targetAndKeyPath in targetsAndKeyPaths) {
-        if (!targetAndKeyPath.isValid) return;
-        [targets addObject:targetAndKeyPath.object];
+        if (targetAndKeyPath.isValid) {
+            [porter addTarget:targetAndKeyPath.object keyPath:targetAndKeyPath.keyPath];
+        }
     }
     
     for (PACK targetAndKeyPath in targetsAndKeyPaths) {
-        
-        __kindof NSObject *target = targetAndKeyPath.object;
-        __kindof NSObject *subscriber = self.object;
-        
-        NSString *targetKeyPath = targetAndKeyPath.keyPath;
-        NSString *subscriberKeyPath = self.keyPath;
-        
-        _YJKVOGroupingPorter *porter = [[_YJKVOGroupingPorter alloc] initWithTarget:target
-                                                                         subscriber:subscriber
-                                                                      targetKeyPath:targetKeyPath];
-        porter.subscriberKeyPath = subscriberKeyPath;
-        porter.targetsReturnHandler = converge;
-        [porter associateWithGroupTarget:targets];
-        
-        [[_YJKVOExecutiveOfficer officer] organizeTarget:target subscriber:subscriber porter:porter];
+        if (targetAndKeyPath.isValid) {
+            [[_YJKVOExecutiveOfficer officer] organizeTarget:targetAndKeyPath.object subscriber:subscriber porter:porter];
+        }
     }
 }
 
@@ -169,16 +145,6 @@
 }
 
 @end
-
-// Retrieve target out of array.
-id _YJKVO_retrieveTarget(NSArray *targets, NSString *variableName) {
-    for (__kindof NSObject *target in targets) {
-        if ([target.yj_KVOVariableName isEqualToString:variableName]) {
-            return target;
-        }
-    }
-    return nil;
-}
 
 
 @implementation YJKVOPacker (YJKVOPosting)

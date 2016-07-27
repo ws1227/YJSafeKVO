@@ -31,6 +31,10 @@
 }
 
 - (void)addPorter:(_YJKVOPorter *)porter {
+    for (_YJKVOPorter *existedPorter in _porters) {
+        if (existedPorter == porter)
+            return;
+    }
     dispatch_semaphore_wait(_semaphore, DISPATCH_TIME_FOREVER);
     [_porters addObject:porter];
     dispatch_semaphore_signal(_semaphore);

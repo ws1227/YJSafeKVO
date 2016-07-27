@@ -13,8 +13,8 @@
 
 typedef void(^YJKVODefaultChangeHandler)(id receiver, id target, id newValue, NSDictionary *change);
 
-typedef void(^YJKVOReceiverTargetsHandler)(id receiver, NSArray *targets);
-typedef id(^YJKVOReceiverTargetsReturnHandler)(id receiver, NSArray *targets);
+typedef void(^YJKVOMultipleValueHandler)();
+typedef id(^YJKVOReduceValueReturnHandler)();
 
 typedef void(^YJKVOSubscriberTargetValueHandler)(id subscriber, id target, id newValue);
 typedef id(^YJKVOSubscriberTargetValueReturnHandler)(id subscriber, id target, id newValue);

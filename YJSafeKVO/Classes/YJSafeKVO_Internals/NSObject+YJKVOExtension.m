@@ -27,20 +27,4 @@
     return objc_getAssociatedObject(self, _cmd);
 }
 
-- (void)setYj_KVOPipeIDKeeper:(_YJKVOPipeIDKeeper *)yj_KVOPipeIDKeeper {
-    objc_setAssociatedObject(self, @selector(yj_KVOPipeIDKeeper), yj_KVOPipeIDKeeper, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-}
-
-- (_YJKVOPipeIDKeeper *)yj_KVOPipeIDKeeper {
-    return objc_getAssociatedObject(self, _cmd);
-}
-
-- (void)setYj_KVOVariableName:(NSString *)yj_KVOVariableName {
-    objc_setAssociatedObject(self, @selector(yj_KVOVariableName), yj_KVOVariableName, OBJC_ASSOCIATION_COPY_NONATOMIC);
-}
-
-- (NSString *)yj_KVOVariableName {
-    return objc_getAssociatedObject(self, _cmd);
-}
-
 @end

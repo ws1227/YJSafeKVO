@@ -39,7 +39,8 @@ NS_ASSUME_NONNULL_BEGIN
  @param targetsAndKeyPaths  The array of YJKVOPacker object for wrapping object and its key path, using PACK(target, keyPath).
  @param updates             The block of code will be performed both immediately and when observed value changes.
  */
-- (void)observeGroup:(NSArray <PACK> *)targetsAndKeyPaths updates:(void(^)(id receiver, NSArray *targets))updates;
+- (void)observeGroup:(NSArray <PACK> *)targetsAndKeyPaths
+             updates:(void(^)(/* id _Nullable newValue1, id _Nullable newValue2, ... */))updates;
 
 
 /**

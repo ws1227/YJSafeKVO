@@ -15,17 +15,21 @@ NS_ASSUME_NONNULL_BEGIN
 __attribute__((visibility("hidden")))
 @interface _YJKVOGroupingPorter : _YJKVOPorter
 
-/// Associate with a group of targets for value change callback.
-- (void)associateWithGroupTarget:(NSArray <__kindof NSObject *> *)groupTargets;
+/// The designated initializer
+- (instancetype)initWithSubscriber:(__kindof NSObject *)subscriber NS_DESIGNATED_INITIALIZER;
+
+/// Add target and target key path
+- (void)addTarget:(__kindof NSObject *)target keyPath:(NSString *)keyPath;
 
 /// Associate with subscribers's key path for applying changes directly.
 @property (nullable, nonatomic, copy) NSString *subscriberKeyPath;
 
-/// The value change callback block.
-@property (nullable, nonatomic, copy) YJKVOReceiverTargetsHandler targetsHandler;
+/// The value change callback block which only for reducing changes.
+@property (nullable, nonatomic, copy) YJKVOMultipleValueHandler multipleValueHandler;
 
-/// The value change callback block which only for converting changes.
-@property (nullable, nonatomic, copy) YJKVOReceiverTargetsReturnHandler targetsReturnHandler;
+/// The value change callback block which only for reducing changes.
+@property (nullable, nonatomic, copy) YJKVOReduceValueReturnHandler reduceValueReturnHandler;
+
 
 @end
 

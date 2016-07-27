@@ -8,9 +8,7 @@
 
 #import "_YJKVOPorter.h"
 
-@implementation _YJKVOPorter {
-    BOOL _employed;
-}
+@implementation _YJKVOPorter
 
 - (instancetype)initWithTarget:(__kindof NSObject *)target subscriber:(__kindof NSObject *)subscriber targetKeyPath:(NSString *)targetKeyPath {
     self = [super init];
@@ -29,13 +27,17 @@
 }
 
 - (void)signUp {
-    _employed = YES;
-    [self.target addObserver:self forKeyPath:self.targetKeyPath options:self.observingOptions context:NULL];
+    if (!_employed) {
+        _employed = YES;
+        [self.target addObserver:self forKeyPath:self.targetKeyPath options:self.observingOptions context:NULL];
+    }
 }
 
 - (void)resign {
-    _employed = NO;
-    [self.target removeObserver:self forKeyPath:self.targetKeyPath context:NULL];
+    if (_employed) {
+        _employed = NO;
+        [self.target removeObserver:self forKeyPath:self.targetKeyPath context:NULL];
+    }
 }
 
 - (BOOL)isEqual:(id)object {

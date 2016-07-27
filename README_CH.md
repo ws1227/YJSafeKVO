@@ -111,15 +111,12 @@ Context: 0x0'
 }] ready];
 ```
 
-如果你希望得到的最终结果需要由多个因素共同决定，那么使用`flooded:`方法，可以传递多个变化，并且返回为一个结果。
+如果你希望得到的最终结果需要由多个因素共同决定，那么使用`flooded:reduce:`方法，可以传递多个变化，并且返回为一个结果。
 
 ```
-[PACK(clown, name) flooded:@[ PACK(foo, name),
-                              PACK(bar, name) ] 
-                  converge:^id(id  _Nonnull observer, NSArray * _Nonnull targets) {
-    UNPACK(Foo, foo)
-    UNPACK(Bar, bar)
-    return [foo.name stringByAppendingString:bar.name];
+[PACK(clown, name) flooded:@[ PACK(foo, name), PACK(bar, name) ]
+							reduce:^id(NSString *fooName, NSString *barName) {
+    return fooName && barName ? [fooName stringByAppendingString:barName] : nil;
 }];
 ```
 

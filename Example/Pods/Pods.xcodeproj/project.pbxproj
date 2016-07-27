@@ -23,10 +23,6 @@
 		32E3D42E1D35363A00764E17 /* _YJKVOExecutiveOfficer.m in Sources */ = {isa = PBXBuildFile; fileRef = 32E3D41B1D35363A00764E17 /* _YJKVOExecutiveOfficer.m */; };
 		32E3D42F1D35363A00764E17 /* _YJKVOGroupingPorter.h in Headers */ = {isa = PBXBuildFile; fileRef = 32E3D41C1D35363A00764E17 /* _YJKVOGroupingPorter.h */; };
 		32E3D4301D35363A00764E17 /* _YJKVOGroupingPorter.m in Sources */ = {isa = PBXBuildFile; fileRef = 32E3D41D1D35363A00764E17 /* _YJKVOGroupingPorter.m */; };
-		32E3D4311D35363A00764E17 /* _YJKVOIdentifierGenerator.h in Headers */ = {isa = PBXBuildFile; fileRef = 32E3D41E1D35363A00764E17 /* _YJKVOIdentifierGenerator.h */; };
-		32E3D4321D35363A00764E17 /* _YJKVOIdentifierGenerator.m in Sources */ = {isa = PBXBuildFile; fileRef = 32E3D41F1D35363A00764E17 /* _YJKVOIdentifierGenerator.m */; };
-		32E3D4331D35363A00764E17 /* _YJKVOPipeIDKeeper.h in Headers */ = {isa = PBXBuildFile; fileRef = 32E3D4201D35363A00764E17 /* _YJKVOPipeIDKeeper.h */; };
-		32E3D4341D35363A00764E17 /* _YJKVOPipeIDKeeper.m in Sources */ = {isa = PBXBuildFile; fileRef = 32E3D4211D35363A00764E17 /* _YJKVOPipeIDKeeper.m */; };
 		32E3D4351D35363A00764E17 /* _YJKVOPorter.h in Headers */ = {isa = PBXBuildFile; fileRef = 32E3D4221D35363A00764E17 /* _YJKVOPorter.h */; };
 		32E3D4361D35363A00764E17 /* _YJKVOPorter.m in Sources */ = {isa = PBXBuildFile; fileRef = 32E3D4231D35363A00764E17 /* _YJKVOPorter.m */; };
 		32E3D4371D35363A00764E17 /* _YJKVOPorterManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 32E3D4241D35363A00764E17 /* _YJKVOPorterManager.h */; };
@@ -37,6 +33,8 @@
 		49392A726538B9CFD928F6202CD1A1EF /* YJSafeKVO-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = D3791AE05BFDB63414B3023599C5B542 /* YJSafeKVO-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		72B5A0F51D40FAEF0099AF58 /* _YJKVOSubscriberManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 72B5A0F31D40FAEF0099AF58 /* _YJKVOSubscriberManager.h */; };
 		72B5A0F61D40FAEF0099AF58 /* _YJKVOSubscriberManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 72B5A0F41D40FAEF0099AF58 /* _YJKVOSubscriberManager.m */; };
+		72E46B171D48BB3D00B1BADF /* _YJKVOPair.h in Headers */ = {isa = PBXBuildFile; fileRef = 72E46B151D48BB3D00B1BADF /* _YJKVOPair.h */; };
+		72E46B181D48BB3D00B1BADF /* _YJKVOPair.m in Sources */ = {isa = PBXBuildFile; fileRef = 72E46B161D48BB3D00B1BADF /* _YJKVOPair.m */; };
 		76612BDACD9D12986BFB79729F0378ED /* YJSafeKVO-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B5AA407E919E35B9F38568906F44EEF /* YJSafeKVO-dummy.m */; };
 		A321E6391D5C429CC1D4A9BBE80ED555 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CEC22C73C1608DFA5D5D78BDCB218219 /* Foundation.framework */; };
 		A4BF6D032DD9B8A2067AEA69B276A7A3 /* Pods-YJSafeKVO_Tests-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 53F8BAA78188F99B12239227F2DB05FC /* Pods-YJSafeKVO_Tests-dummy.m */; };
@@ -74,10 +72,6 @@
 		32E3D41B1D35363A00764E17 /* _YJKVOExecutiveOfficer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = _YJKVOExecutiveOfficer.m; sourceTree = "<group>"; };
 		32E3D41C1D35363A00764E17 /* _YJKVOGroupingPorter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = _YJKVOGroupingPorter.h; sourceTree = "<group>"; };
 		32E3D41D1D35363A00764E17 /* _YJKVOGroupingPorter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = _YJKVOGroupingPorter.m; sourceTree = "<group>"; };
-		32E3D41E1D35363A00764E17 /* _YJKVOIdentifierGenerator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = _YJKVOIdentifierGenerator.h; sourceTree = "<group>"; };
-		32E3D41F1D35363A00764E17 /* _YJKVOIdentifierGenerator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = _YJKVOIdentifierGenerator.m; sourceTree = "<group>"; };
-		32E3D4201D35363A00764E17 /* _YJKVOPipeIDKeeper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = _YJKVOPipeIDKeeper.h; sourceTree = "<group>"; };
-		32E3D4211D35363A00764E17 /* _YJKVOPipeIDKeeper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = _YJKVOPipeIDKeeper.m; sourceTree = "<group>"; };
 		32E3D4221D35363A00764E17 /* _YJKVOPorter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = _YJKVOPorter.h; sourceTree = "<group>"; };
 		32E3D4231D35363A00764E17 /* _YJKVOPorter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = _YJKVOPorter.m; sourceTree = "<group>"; };
 		32E3D4241D35363A00764E17 /* _YJKVOPorterManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = _YJKVOPorterManager.h; sourceTree = "<group>"; };
@@ -90,6 +84,8 @@
 		5DAD058E9973549EF45AAEA9950782FD /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		72B5A0F31D40FAEF0099AF58 /* _YJKVOSubscriberManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = _YJKVOSubscriberManager.h; sourceTree = "<group>"; };
 		72B5A0F41D40FAEF0099AF58 /* _YJKVOSubscriberManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = _YJKVOSubscriberManager.m; sourceTree = "<group>"; };
+		72E46B151D48BB3D00B1BADF /* _YJKVOPair.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = _YJKVOPair.h; sourceTree = "<group>"; };
+		72E46B161D48BB3D00B1BADF /* _YJKVOPair.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = _YJKVOPair.m; sourceTree = "<group>"; };
 		86C9521BFC08D80627EAAD2075C4FC8E /* Pods-YJSafeKVO_Tests.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = "sourcecode.module-map"; path = "Pods-YJSafeKVO_Tests.modulemap"; sourceTree = "<group>"; };
 		888819D5D2CB072532037FD937A83414 /* Pods-YJSafeKVO_Tests-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-YJSafeKVO_Tests-acknowledgements.plist"; sourceTree = "<group>"; };
 		8B7C43D15693E79428944DFEFD16D90E /* YJSafeKVO.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = "sourcecode.module-map"; path = YJSafeKVO.modulemap; sourceTree = "<group>"; };
@@ -141,6 +137,8 @@
 				32E3D4281D35363A00764E17 /* NSObject+YJKVOExtension.h */,
 				32E3D4291D35363A00764E17 /* NSObject+YJKVOExtension.m */,
 				32E3D4191D35363A00764E17 /* _YJKVODefines.h */,
+				72E46B151D48BB3D00B1BADF /* _YJKVOPair.h */,
+				72E46B161D48BB3D00B1BADF /* _YJKVOPair.m */,
 				32E3D41A1D35363A00764E17 /* _YJKVOExecutiveOfficer.h */,
 				32E3D41B1D35363A00764E17 /* _YJKVOExecutiveOfficer.m */,
 				32E3D4221D35363A00764E17 /* _YJKVOPorter.h */,
@@ -153,10 +151,6 @@
 				72B5A0F41D40FAEF0099AF58 /* _YJKVOSubscriberManager.m */,
 				32E3D4241D35363A00764E17 /* _YJKVOPorterManager.h */,
 				32E3D4251D35363A00764E17 /* _YJKVOPorterManager.m */,
-				32E3D4201D35363A00764E17 /* _YJKVOPipeIDKeeper.h */,
-				32E3D4211D35363A00764E17 /* _YJKVOPipeIDKeeper.m */,
-				32E3D41E1D35363A00764E17 /* _YJKVOIdentifierGenerator.h */,
-				32E3D41F1D35363A00764E17 /* _YJKVOIdentifierGenerator.m */,
 			);
 			path = YJSafeKVO_Internals;
 			sourceTree = "<group>";
@@ -300,11 +294,10 @@
 				320C41BE1D2D3E53006361F6 /* NSObject+YJClassObjectChecking.h in Headers */,
 				320C41551D2D366C006361F6 /* NSObject+YJIMPInsertion.h in Headers */,
 				32E3D42C1D35363A00764E17 /* _YJKVODefines.h in Headers */,
+				72E46B171D48BB3D00B1BADF /* _YJKVOPair.h in Headers */,
 				32E3D42A1D35363A00764E17 /* _YJKVOBindingPorter.h in Headers */,
-				32E3D4331D35363A00764E17 /* _YJKVOPipeIDKeeper.h in Headers */,
 				32E3D42F1D35363A00764E17 /* _YJKVOGroupingPorter.h in Headers */,
 				32E3D4141D3535BB00764E17 /* YJKVOPacker.h in Headers */,
-				32E3D4311D35363A00764E17 /* _YJKVOIdentifierGenerator.h in Headers */,
 				49392A726538B9CFD928F6202CD1A1EF /* YJSafeKVO-umbrella.h in Headers */,
 				320C41531D2D366C006361F6 /* NSObject+YJSafeKVO.h in Headers */,
 				32E3D4371D35363A00764E17 /* _YJKVOPorterManager.h in Headers */,
@@ -398,11 +391,10 @@
 				320C41BF1D2D3E53006361F6 /* NSObject+YJClassObjectChecking.m in Sources */,
 				32E3D42E1D35363A00764E17 /* _YJKVOExecutiveOfficer.m in Sources */,
 				32E3D42B1D35363A00764E17 /* _YJKVOBindingPorter.m in Sources */,
-				32E3D4321D35363A00764E17 /* _YJKVOIdentifierGenerator.m in Sources */,
 				32E3D4301D35363A00764E17 /* _YJKVOGroupingPorter.m in Sources */,
-				32E3D4341D35363A00764E17 /* _YJKVOPipeIDKeeper.m in Sources */,
 				32E3D4361D35363A00764E17 /* _YJKVOPorter.m in Sources */,
 				32E3D43C1D35363A00764E17 /* NSObject+YJKVOExtension.m in Sources */,
+				72E46B181D48BB3D00B1BADF /* _YJKVOPair.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

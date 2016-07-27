@@ -49,11 +49,10 @@
      }] ready];
 ```
 
--flooded:converge:
+-flooded:reduce:
 
 ```
-[PACK(<#subscriber#>, <#keyPath#>) flooded:@[ PACK(<#target1#>, <#keyPath1#>), PACK(<#target2#>, <#keyPath2#>) ] converge:^id _Nullable(<#SubscriberClass *subscriber#>, NSArray *targets) {
-    UNPACK(<#TargetClass1#>, <#target1#>)  UNPACK(<#TargetClass2#>, <#target2#>)
+[PACK(<#subscriber#>, <#keyPath#>) flooded:@[ PACK(<#target1#>, <#keyPath1#>), PACK(<#target2#>, <#keyPath2#>) ] reduce:^id _Nullable(<#NewValueClass * _Nullable newValue1#>, <#NewValueClass * _Nullable newValue2#>) {
     return <#code#>;
 }];
 ```
